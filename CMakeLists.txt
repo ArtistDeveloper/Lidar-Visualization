@@ -23,3 +23,10 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PRIVATE Qt6::Widgets Qt6::OpenGL Qt6::OpenGLWidgets
 )
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND "${CMAKE_PREFIX_PATH}/bin/windeployqt.exe"
+            "$<TARGET_FILE:${PROJECT_NAME}>"
+            --debug
+    COMMENT "Running wideployqt to bundle Qt dependencies"
+)
