@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/MyOpenGLWidget.cpp
     src/MyOpenGLWidget.h
+    src/BinLoad.cpp
 )
 
 # QT6 위젯 라이브러리 링크
