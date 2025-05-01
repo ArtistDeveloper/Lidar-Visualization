@@ -1,4 +1,5 @@
 add_subdirectory(ui)
+add_subdirectory(core)
 
 # add_executable에 대한 QT의 래퍼.
 # 자동으로 정적 QT Build의 QT 플러그인을 링킹,
@@ -9,8 +10,9 @@ qt_add_executable(${PROJECT_NAME}
 
 # QT6 위젯 라이브러리 링크
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE 
+    PRIVATE
         ui
+        core
         Qt6::Widgets 
         Qt6::OpenGL 
         Qt6::OpenGLWidgets
