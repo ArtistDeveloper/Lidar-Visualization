@@ -2,10 +2,12 @@
 #include <QDebug>
 
 MyOpenGLWidget::MyOpenGLWidget(QWidget *parent)
-    : QOpenGLWidget(parent) {
+    : QOpenGLWidget(parent)
+{
 }
 
-MyOpenGLWidget::~MyOpenGLWidget() {
+MyOpenGLWidget::~MyOpenGLWidget()
+{
     makeCurrent();
     glDeleteVertexArrays(1, &m_vao);
     glDeleteBuffers(1, &m_vbo);
@@ -13,7 +15,8 @@ MyOpenGLWidget::~MyOpenGLWidget() {
     doneCurrent();
 }
 
-void MyOpenGLWidget::initializeGL() {
+void MyOpenGLWidget::initializeGL()
+{
     initializeOpenGLFunctions();
 
     static const char *vertexShaderSrc = R"(
@@ -38,9 +41,9 @@ void MyOpenGLWidget::initializeGL() {
     m_program->link();
 
     GLfloat vertices[] = {
-         0.0f,  0.5f, 0.0f,  // 위
-        -0.5f, -0.5f, 0.0f,  // 좌하
-         0.5f, -0.5f, 0.0f   // 우하
+        0.0f, 0.5f, 0.0f,   // 위
+        -0.5f, -0.5f, 0.0f, // 좌하
+        0.5f, -0.5f, 0.0f   // 우하
     };
 
     glGenVertexArrays(1, &m_vao);
@@ -57,11 +60,13 @@ void MyOpenGLWidget::initializeGL() {
     glBindVertexArray(0);
 }
 
-void MyOpenGLWidget::resizeGL(int w, int h) {
+void MyOpenGLWidget::resizeGL(int w, int h)
+{
     glViewport(0, 0, w, h);
 }
 
-void MyOpenGLWidget::paintGL() {
+void MyOpenGLWidget::paintGL()
+{
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 

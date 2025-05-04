@@ -4,7 +4,8 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 
-class MyOpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
+class MyOpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
+{
     Q_OBJECT
 
 public:

@@ -7,7 +7,8 @@
 #include "MyOpenGLWidget.h"
 #include "BinLoad.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     QSurfaceFormat format;
     format.setVersion(3, 3);
     format.setProfile(QSurfaceFormat::CoreProfile);
@@ -29,13 +30,12 @@ int main(int argc, char *argv[]) {
     QPushButton *button = new QPushButton("눌러봐요");
 
     // 버튼 눌렀을 때 출력
-    QObject::connect(button, &QPushButton::clicked, [](){
-        qDebug() << "버튼이 눌렸습니다!";
-    });
+    QObject::connect(button, &QPushButton::clicked, []()
+                     { qDebug() << "버튼이 눌렸습니다!"; });
 
     // 레이아웃에 위젯들 추가
-    layout->addWidget(glWidget, 1);  // OpenGL 위젯 (비중 1)
-    layout->addWidget(button);       // 버튼 (고정 높이)
+    layout->addWidget(glWidget, 1); // OpenGL 위젯 (비중 1)
+    layout->addWidget(button);      // 버튼 (고정 높이)
 
     centralWidget->setLayout(layout);
     window.setCentralWidget(centralWidget);
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     window.resize(800, 600);
     window.show();
 
-    TestLoadBinFile();    
+    TestLoadBinFile();
 
     return app.exec();
 }
