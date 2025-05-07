@@ -22,4 +22,6 @@ private:
     QOpenGLShaderProgram *m_program = nullptr;
     GLuint m_vao = 0;
     GLuint m_vbo = 0;
+
+    std::vector<PointXYZI> m_pointCloud;
 };
