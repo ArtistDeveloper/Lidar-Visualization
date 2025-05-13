@@ -9,4 +9,3 @@ struct PointXYZI
 };
 
 std::vector<PointXYZI> loadKittiBinFile(const std::string &file_path);
-void TestLoadBinFile();

@@ -18,14 +18,6 @@ std::vector<PointXYZI> loadKittiBinFile(const std::string &file_path)
         points.push_back(point);
     }
 
+    std::cout << "점 개수 : " << points.size() << std::endl;
     return points;
-}
-
-void TestLoadBinFile()
-{
-    // point cloud data test
-    std::string path = "C:/Users/ParkJunsu/Desktop/raw_data_downloader/2011_09_28/2011_09_28_drive_0001_sync/velodyne_points/data/0000000000.bin";
-    std::vector<PointXYZI> cloud = loadKittiBinFile(path);
-
-    std::cout << "점 개수 : " << cloud.size() << std::endl;
 }

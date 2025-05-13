@@ -43,7 +43,5 @@ int main(int argc, char *argv[])
     window.resize(800, 600);
     window.show();
 
-    TestLoadBinFile();
-
     return app.exec();
 }
