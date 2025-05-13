@@ -9,6 +9,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 
+private slots:
+    void onOpenFolderClicked();
+
 private:
     void setupUI();
 };
