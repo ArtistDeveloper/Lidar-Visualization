@@ -29,12 +29,15 @@ void MainWindow::setupUI()
 void MainWindow::loadFolderData(const QString &folderPath)
 {
     QDir dir(folderPath);
+    chunckPoints_.clear();
     QStringList binFiles = dir.entryList(QStringList() << "*.bin", QDir::Files);
 
     for (const QString &fileName : binFiles)
     {
         std::string filePath = QDir(folderPath).filePath(fileName).toStdString();
         std::vector<PointXYZI> points = BinLoader::loadKittiBinFile(filePath);
-        qDebug() << QString("로드 완료: %1, 포인트 수: %2").arg(fileName).arg(points.size());
+        chunckPoints_.push_back(points);
+        // qDebug() << QString("로드 완료: %1, 포인트 수: %2").arg(fileName).arg(points.size());
     }
+    qDebug() << QString("전체 데이터 수: %1").arg(chunckPoints_.size());
 }

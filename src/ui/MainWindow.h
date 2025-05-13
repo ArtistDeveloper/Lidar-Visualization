@@ -20,4 +20,5 @@ private:
     void setupUI();
     MyOpenGLWidget *glWidget_;
     OpenFolderButton *openFolderBtn_;
+    std::vector<std::vector<PointXYZI>> chunckPoints_;
 };

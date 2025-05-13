@@ -53,8 +53,6 @@ void MyOpenGLWidget::initializeGL()
 
     glBindVertexArray(m_vao);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-    // 포인트 클라우드를 VBO에 업로드
     glBufferData(GL_ARRAY_BUFFER, m_pointCloud.size() * sizeof(PointXYZI), m_pointCloud.data(), GL_STATIC_DRAW);
 
     // Vertex Attribute: position (x, y, z)
@@ -63,6 +61,7 @@ void MyOpenGLWidget::initializeGL()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    // glEnable(GL_DEPTH_TEST);
 }
 
 void MyOpenGLWidget::resizeGL(int w, int h)

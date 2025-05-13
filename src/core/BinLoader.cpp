@@ -8,7 +8,7 @@ std::vector<PointXYZI> BinLoader::loadKittiBinFile(const std::string &file_path)
 
     if (!file)
     {
-        std::cerr << "파일을 열 수 없습니다: " << file_path << std::endl;
+        std::cerr << "Unable to open the file: " << file_path << std::endl;
         return points;
     }
 
@@ -18,6 +18,5 @@ std::vector<PointXYZI> BinLoader::loadKittiBinFile(const std::string &file_path)
         points.push_back(point);
     }
 
-    std::cout << "점 개수 : " << points.size() << std::endl;
     return points;
 }
