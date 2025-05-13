@@ -1,7 +1,8 @@
 #include "OpenFolderButton.h"
 #include <QFileDialog>
+#include <QDebug>
 
-OpenFolderButton::OpenFolderButton(QWidget *parent) : QPushButton("폴더 열기", parent)
+OpenFolderButton::OpenFolderButton(QWidget *parent) : QPushButton("Open Folder", parent)
 {
     move(10, 10);
     raise();
@@ -10,9 +11,10 @@ OpenFolderButton::OpenFolderButton(QWidget *parent) : QPushButton("폴더 열기
 
 void OpenFolderButton::handleClick()
 {
-    QString folderPath = QFileDialog::getExistingDirectory(this, "폴더 선택");
-    if (folderPath.isEmpty())
+    QString folderPath = QFileDialog::getExistingDirectory(this, "Select Folder");
+    if (!folderPath.isEmpty())
     {
+        qDebug() << folderPath;
         emit folderSelected(folderPath);
     }
 }
