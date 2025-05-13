@@ -1,4 +1,5 @@
 #include "MyOpenGLWidget.h"
+#include "BinLoader.h"
 #include <QDebug>
 
 MyOpenGLWidget::MyOpenGLWidget(QWidget *parent)
@@ -21,7 +22,7 @@ void MyOpenGLWidget::initializeGL()
 
     // Load point cloud
     std::string path = "C:/Users/ParkJunsu/Desktop/raw_data_downloader/2011_09_28/2011_09_28_drive_0001_sync/velodyne_points/data/0000000000.bin";
-    m_pointCloud = loadKittiBinFile(path);
+    m_pointCloud = BinLoader::loadKittiBinFile(path);
 
     // Shader
     static const char *vertexShaderSrc = R"(

@@ -1,7 +1,7 @@
 #include <iostream>
-#include "BinLoad.h"
+#include "BinLoader.h"
 
-std::vector<PointXYZI> loadKittiBinFile(const std::string &file_path)
+std::vector<PointXYZI> BinLoader::loadKittiBinFile(const std::string &file_path)
 {
     std::ifstream file(file_path, std::ios::binary);
     std::vector<PointXYZI> points;

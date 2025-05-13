@@ -1,7 +1,9 @@
 #include "MainWindow.h"
 #include "MyOpenGLWidget.h"
+#include "BinLoader.h"
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
@@ -18,6 +20,7 @@ void MainWindow::setupUI()
 
     QObject::connect(button, &QPushButton::clicked, []()
                      { qDebug() << "버튼이 눌러졌습니다!"; });
+
 
     layout->addWidget(glWidget, 1);
     layout->addWidget(button);
