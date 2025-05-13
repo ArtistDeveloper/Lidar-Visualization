@@ -2,6 +2,7 @@ add_library(ui STATIC
     MyOpenGLWidget.cpp MyOpenGLWidget.h
     MainWindow.cpp MainWindow.h
     OpenFolderButton.cpp OpenFolderButton.h
+    ProgressDialog.cpp ProgressDialog.h
 )
 
 target_include_directories(ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
