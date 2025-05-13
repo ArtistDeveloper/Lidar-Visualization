@@ -1,8 +1,7 @@
 #include "MainWindow.h"
-#include "MyOpenGLWidget.h"
 #include "BinLoader.h"
+#include "OpenFolderButton.h"
 #include <QVBoxLayout>
-#include <QPushButton>
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
@@ -13,22 +12,13 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(par
 void MainWindow::setupUI()
 {
     QWidget *centralWidget = new QWidget;
+
+    glWidget_ = new MyOpenGLWidget(centralWidget);
+    openFolderBtn_ = new OpenFolderButton(glWidget_);
+    connect(openFolderBtn_, &OpenFolderButton::folderSelected, this, &MainWindow::loadFolderData);
+
     QVBoxLayout *layout = new QVBoxLayout;
-
-    MyOpenGLWidget *glWidget = new MyOpenGLWidget;
-    QPushButton *button = new QPushButton("눌러 봐요");
-
-    QObject::connect(button, &QPushButton::clicked, []()
-                     { qDebug() << "버튼이 눌러졌습니다!"; });
-
-    layout->addWidget(glWidget, 1);
-    layout->addWidget(button);
-
-    QPushButton *openFolderBtn = new QPushButton("폴더 열기", glWidget);
-    openFolderBtn->move(10, 10); // 좌상단 위치
-    openFolderBtn->raise(); // 위로 올리기
-
-    QObject::connect(openFolderBtn, &QPushButton::clicked, this, &MainWindow::onOpenFolderClicked);
+    layout->addWidget(glWidget_);
 
     centralWidget->setLayout(layout);
     setCentralWidget(centralWidget);
@@ -36,13 +26,8 @@ void MainWindow::setupUI()
     resize(800, 600);
 }
 
-void MainWindow::onOpenFolderClicked()
+void MainWindow::loadFolderData(const QString &folderPath)
 {
-    QString folderPath = QFileDialog::getExistingDirectory(this, "폴더 선택");
-
-    if (folderPath.isEmpty())
-        return;
-
     QDir dir(folderPath);
     QStringList binFiles = dir.entryList(QStringList() << "*.bin", QDir::Files);
 
@@ -50,10 +35,6 @@ void MainWindow::onOpenFolderClicked()
     {
         std::string filePath = QDir(folderPath).filePath(fileName).toStdString();
         std::vector<PointXYZI> points = BinLoader::loadKittiBinFile(filePath);
-
-        // 이후 points 사용: 예를 들어 저장, 시각화 등
-        qDebug() << QString("로드 완료: %1, 포인트 수: %2")
-                        .arg(fileName)
-                        .arg(points.size());
+        qDebug() << QString("로드 완료: %1, 포인트 수: %2").arg(fileName).arg(points.size());
     }
 }
