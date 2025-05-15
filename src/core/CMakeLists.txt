@@ -1,6 +1,7 @@
 add_library(core STATIC
     BinLoader.cpp BinLoader.h
     BinDataLoader.cpp BinDataLoader.h
+    PointCloudPlayer.cpp PointCloudPlayer.h
 )
 
 target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
