@@ -89,9 +89,9 @@ void MainWindow::loadFolderData(const QString &folderPath)
     progressDialog.close();
 
     // TODO: point 로드 후 player와 연결
-    // chunckPoints_ = points;
+    chunckPoints_ = points;
     // player_->setData(chunckPoints_);
-    // playerWidget_->setMaximum(chunckPoints_.size() - 1);
+    playerWidget_->setMaximum(chunckPoints_.size() - 1);
     emit dataLoaded(chunckPoints_);
 }
 

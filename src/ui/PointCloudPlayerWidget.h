@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QSlider>
+#include <QLabel>
 
 class PointCloudPlayerWidget : public QWidget
 {
@@ -32,6 +33,8 @@ private:
     void setupUI();
     void createConnection();
 
+    QLabel *minLabel_;
+    QLabel *maxLabel_;
     QPushButton *playPauseBtn_;
     QPushButton *nextBtn_;
     QPushButton *prevBtn_;

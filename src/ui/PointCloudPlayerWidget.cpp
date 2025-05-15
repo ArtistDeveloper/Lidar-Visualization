@@ -15,6 +15,9 @@ void PointCloudPlayerWidget::setupUI()
     nextBtn_ = new QPushButton("Next");
     slider_ = new QSlider(Qt::Horizontal);
 
+    minLabel_ = new QLabel("0");
+    maxLabel_ = new QLabel("0");
+
     slider_->setMinimum(0);
     slider_->setTickPosition(QSlider::TicksBelow);
     slider_->setSingleStep(1);
@@ -23,7 +26,9 @@ void PointCloudPlayerWidget::setupUI()
     layout->addWidget(prevBtn_);
     layout->addWidget(playPauseBtn_);
     layout->addWidget(nextBtn_);
+    layout->addWidget(minLabel_);
     layout->addWidget(slider_);
+    layout->addWidget(maxLabel_);
     setLayout(layout);
 }
 
@@ -58,4 +63,5 @@ void PointCloudPlayerWidget::updateSlider(int index)
 void PointCloudPlayerWidget::setMaximum(int maxFrameIndex)
 {
     slider_->setMaximum(maxFrameIndex);
+    maxLabel_->setText(QString::number(maxFrameIndex));
 }
