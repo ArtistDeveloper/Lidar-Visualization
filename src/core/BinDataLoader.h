@@ -8,7 +8,7 @@ class BinDataLoader : public QObject
 {
     Q_OBJECT
 public:
-    QVector<std::vector<PointXYZI>> loadFromFolder(const QString &folderPath);
+    std::vector<std::vector<PointXYZI>> loadFromFolder(const QString &folderPath);
 
 signals:
     void progressUpdated(int value);

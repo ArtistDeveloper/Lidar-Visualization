@@ -75,7 +75,7 @@ void MainWindow::loadFolderData(const QString &folderPath)
 
     connect(&loader, &BinDataLoader::progressUpdated, &progressDialog, &ProgressDialog::updateProgress);
     
-    QVector<std::vector<PointXYZI>> points = loader.loadFromFolder(folderPath);
+    std::vector<std::vector<PointXYZI>> points = loader.loadFromFolder(folderPath);
     qDebug() << QString("points.size: %1").arg(points.size());
 
     progressDialog.close();

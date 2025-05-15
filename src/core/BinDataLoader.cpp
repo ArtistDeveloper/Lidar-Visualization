@@ -2,9 +2,9 @@
 
 #include <QDir>
 
-QVector<std::vector<PointXYZI>> BinDataLoader::loadFromFolder(const QString &folderPath)
+std::vector<std::vector<PointXYZI>> BinDataLoader::loadFromFolder(const QString &folderPath)
 {
-    QVector<std::vector<PointXYZI>> allPoints;
+    std::vector<std::vector<PointXYZI>> allPoints;
     QDir dir(folderPath);
     QStringList binFiles = dir.entryList(QStringList() << "*.bin", QDir::Files);
     for (int i = 0; i < binFiles.size(); ++i) {
