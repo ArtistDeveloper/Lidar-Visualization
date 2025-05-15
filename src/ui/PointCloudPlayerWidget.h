@@ -5,22 +5,28 @@
 #include <QPushButton>
 #include <QSlider>
 
-class PointCloudPlayerWidget : public QWidget {
+class PointCloudPlayerWidget : public QWidget
+{
     Q_OBJECT
 
 public:
     explicit PointCloudPlayerWidget(QWidget *parent = nullptr);
-    void setMaximum(int max);
+    void setMaximum(int maxFrameIndex); // 슬라이더 최대값 설정
 
+// Signal을 사용하여 UI가 동작하는 알림만 전달하고, 실제 비즈니스 로직은 PointCloudPlayer.cpp에 구현
 signals:
-    void onPlayPauseClicked();
+    void playClicked();
     void pauseClicked();
     void nextClicked();
     void prevClicked();
-    void onSliderMoved(int index);
+    void sliderMoved(int index);
 
 public slots:
-    void updateSlider(int index);
+    void updateSlider(int index); // 외부에서 현재 프레임을 반영
+
+private slots:
+    void onPlayPauseClicked();
+    void onSliderMoved(int value);
 
 private:
     void setupUI();

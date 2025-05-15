@@ -8,16 +8,6 @@ PointCloudPlayerWidget::PointCloudPlayerWidget(QWidget *parent) : QWidget(parent
     createConnection();
 }
 
-void PointCloudPlayerWidget::setMaximum(int max)
-{
-    throw std::logic_error("setMaximum() is not implemented yet.");
-}
-
-void PointCloudPlayerWidget::updateSlider(int index)
-{
-    throw std::logic_error("updateSlider() is not implemented yet.");
-}
-
 void PointCloudPlayerWidget::setupUI()
 {
     playPauseBtn_ = new QPushButton("Play");
@@ -43,4 +33,29 @@ void PointCloudPlayerWidget::createConnection()
     connect(prevBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::prevClicked);
     connect(nextBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::nextClicked);
     connect(slider_, &QSlider::sliderMoved, this, &PointCloudPlayerWidget::onSliderMoved);
+}
+
+void PointCloudPlayerWidget::onPlayPauseClicked()
+{
+    isPlaying_ = !isPlaying_;
+    playPauseBtn_->setText(isPlaying_ ? "Pause" : "Play");
+    if (isPlaying_)
+        emit playClicked();
+    else
+        emit pauseClicked();
+}
+
+void PointCloudPlayerWidget::onSliderMoved(int value)
+{
+    emit sliderMoved(value);
+}
+
+void PointCloudPlayerWidget::updateSlider(int index)
+{
+    slider_->setValue(index);
+}
+
+void PointCloudPlayerWidget::setMaximum(int maxFrameIndex)
+{
+    slider_->setMaximum(maxFrameIndex);
 }
