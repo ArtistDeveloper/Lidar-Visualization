@@ -1,9 +1,10 @@
 // PointCloudPlayer.h
 #pragma once
 
-#include "BinLoader.h"
 #include <QObject>
 #include <QTimer>
+
+#include "BinLoader.h"
 
 class PointCloudPlayer : public QObject {
     Q_OBJECT

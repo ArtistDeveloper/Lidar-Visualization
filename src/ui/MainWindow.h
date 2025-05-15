@@ -6,6 +6,8 @@
 
 #include "OpenFolderButton.h"
 #include "MyOpenGLWidget.h"
+#include "PointCloudPlayer.h"
+#include "PointCloudPlayerWidget.h"
 
 class MainWindow : public QMainWindow
 {

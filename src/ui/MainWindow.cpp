@@ -1,26 +1,13 @@
-/*!SECTION
-가져야 할 책임:
-1. UI 구성 (setupUI)
-2. 시그널-슬롯 연결 (createConnection)
-3. 사용자 인터랙션 처리 (onOpenFolderClicked)
-4. 로직 클래스 호출 및 연결 (BinDataLoader 같은 로직 클래스 사용)
-5. 데이터 로드 후 UI 전달 및 후처리 (emit dataLoaded, glWidget_에 전달 등)
-
-가져서는 안 되는 책임:
-1. 로우 레벨 I/O (BinLoader)
-2. 데이터 파싱 및 처리 로직 (loadFolderData)
-3. 긴 반복 작업 및 상태 관리 (progressDialog 직접 제어 포함)
-*/
-
 #include "MainWindow.h"
-#include "BinLoader.h"
-#include "OpenFolderButton.h"
-#include "ProgressDialog.h"
-#include "BinDataLoader.h"
 
 #include <QVBoxLayout>
 #include <QFileDialog>
 #include <QCoreApplication>
+
+#include "BinLoader.h"
+#include "OpenFolderButton.h"
+#include "ProgressDialog.h"
+#include "BinDataLoader.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {

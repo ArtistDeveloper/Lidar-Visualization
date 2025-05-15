@@ -1,6 +1,7 @@
+#include <QDebug>
+
 #include "MyOpenGLWidget.h"
 #include "BinLoader.h"
-#include <QDebug>
 
 MyOpenGLWidget::MyOpenGLWidget(QWidget *parent)
     : QOpenGLWidget(parent)

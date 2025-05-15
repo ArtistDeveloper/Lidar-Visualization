@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QVector>
+
 #include "BinLoader.h"
 
 class BinDataLoader : public QObject

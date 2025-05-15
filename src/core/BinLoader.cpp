@@ -1,5 +1,6 @@
-#include <iostream>
 #include "BinLoader.h"
+
+#include <iostream>
 
 std::vector<PointXYZI> BinLoader::loadKittiBinFile(const std::string &file_path)
 {
