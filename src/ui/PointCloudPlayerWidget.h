@@ -13,19 +13,22 @@ public:
     void setMaximum(int max);
 
 signals:
-    void playClicked();
+    void onPlayPauseClicked();
     void pauseClicked();
     void nextClicked();
     void prevClicked();
-    void sliderMoved(int index);
+    void onSliderMoved(int index);
 
 public slots:
     void updateSlider(int index);
 
 private:
-    QPushButton *playButton_;
-    QPushButton *nextButton_;
-    QPushButton *prevButton_;
+    void setupUI();
+    void createConnection();
+
+    QPushButton *playPauseBtn_;
+    QPushButton *nextBtn_;
+    QPushButton *prevBtn_;
     QSlider *slider_;
     bool isPlaying_ = false;
 };

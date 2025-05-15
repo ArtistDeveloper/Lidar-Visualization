@@ -22,11 +22,15 @@ void MainWindow::setupUI()
     glWidget_ = new MyOpenGLWidget(centralWidget);
     openFolderBtn_ = new OpenFolderButton(glWidget_);
     // TODO: 에러 나지 않게 구현 추가 필요
-    // playerWidget_ = new PointCloudPlayerWidget;
+    playerWidget_ = new PointCloudPlayerWidget;
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(glWidget_);
-    // layout->addWidget(playerWidget_);
+    layout->addWidget(playerWidget_);
+
+    // 비율 설정: glWidget 4, playerWidget 1
+    layout->setStretch(0, 8); // 첫 번째 위젯 (glWidget_)
+    layout->setStretch(1, 1); // 두 번째 위젯 (playerWidget_)
 
     centralWidget->setLayout(layout);
     setCentralWidget(centralWidget);
@@ -46,11 +50,11 @@ void MainWindow::createConnection()
     // if (index < chunckPoints_.size())
     //     glWidget_->setPointCloudData(chunckPoints_[index]);
     // playerWidget_->updateSlider(index); });
-    // connect(playerWidget_, &PointCloudPlayerWidget::playClicked, player_, &PointCloudPlayer::play);
+    // connect(playerWidget_, &PointCloudPlayerWidget::onPlayPauseClicked, player_, &PointCloudPlayer::play);
     // connect(playerWidget_, &PointCloudPlayerWidget::pauseClicked, player_, &PointCloudPlayer::pause);
     // connect(playerWidget_, &PointCloudPlayerWidget::nextClicked, player_, &PointCloudPlayer::nextFrame);
     // connect(playerWidget_, &PointCloudPlayerWidget::prevClicked, player_, &PointCloudPlayer::prevFrame);
-    // connect(playerWidget_, &PointCloudPlayerWidget::sliderMoved, player_, &PointCloudPlayer::setFrame);
+    // connect(playerWidget_, &PointCloudPlayerWidget::onSliderMoved, player_, &PointCloudPlayer::setFrame);
 }
 
 void MainWindow::open()
