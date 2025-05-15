@@ -6,15 +6,4 @@ OpenFolderButton::OpenFolderButton(QWidget *parent) : QPushButton("Open Folder",
 {
     move(10, 10);
     raise();
-    connect(this, &QPushButton::clicked, this, &OpenFolderButton::handleClick);
-}
-
-void OpenFolderButton::handleClick()
-{
-    QString folderPath = QFileDialog::getExistingDirectory(this, "Select Folder");
-    if (!folderPath.isEmpty())
-    {
-        qDebug() << folderPath;
-        emit folderSelected(folderPath);
-    }
 }

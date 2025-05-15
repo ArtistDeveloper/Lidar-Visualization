@@ -14,15 +14,19 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 
-private slots:
+private:
+    void setupUI();
+    void createConnection();
+    void open();
     void loadFolderData(const QString &folderPath);
+
+    MyOpenGLWidget *glWidget_;
+    OpenFolderButton *openFolderBtn_;
+    std::vector<std::vector<PointXYZI>> chunckPoints_;
 
 signals:
     void dataLoaded(const std::vector<std::vector<PointXYZI>> &data);
 
-private:
-    void setupUI();
-    MyOpenGLWidget *glWidget_;
-    OpenFolderButton *openFolderBtn_;
-    std::vector<std::vector<PointXYZI>> chunckPoints_;
+private slots:
+    void onOpenFolderClikced();
 };

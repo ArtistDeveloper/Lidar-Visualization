@@ -9,6 +9,7 @@
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
     setupUI();
+    createConnection();
 }
 
 void MainWindow::setupUI()
@@ -17,7 +18,6 @@ void MainWindow::setupUI()
 
     glWidget_ = new MyOpenGLWidget(centralWidget);
     openFolderBtn_ = new OpenFolderButton(glWidget_);
-    connect(openFolderBtn_, &OpenFolderButton::folderSelected, this, &MainWindow::loadFolderData);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(glWidget_);
@@ -26,6 +26,25 @@ void MainWindow::setupUI()
     setCentralWidget(centralWidget);
 
     resize(800, 600);
+}
+
+void MainWindow::createConnection()
+{
+    connect(openFolderBtn_, &QPushButton::clicked, this, &MainWindow::onOpenFolderClikced);
+}
+
+void MainWindow::open()
+{
+    QString folderPath = QFileDialog::getExistingDirectory(this, "Select Folder");
+    if (folderPath.isEmpty())
+        return;
+    qDebug() << folderPath;
+    loadFolderData(folderPath);
+}
+
+void MainWindow::onOpenFolderClikced()
+{
+    open();
 }
 
 void MainWindow::loadFolderData(const QString &folderPath)
@@ -38,7 +57,7 @@ void MainWindow::loadFolderData(const QString &folderPath)
     ProgressDialog progressDialog(this);
     progressDialog.setRange(0, totalFiles);
     progressDialog.show();
-    QCoreApplication::processEvents();  // ensure dialog is shown
+    QCoreApplication::processEvents(); // ensure dialog is shown
 
     for (int i = 0; i < totalFiles; ++i)
     {
@@ -48,7 +67,7 @@ void MainWindow::loadFolderData(const QString &folderPath)
         chunckPoints_.push_back(points);
 
         progressDialog.setValue(i + 1);
-        QCoreApplication::processEvents();  // ensure UI updates
+        QCoreApplication::processEvents(); // ensure UI updates
         // qDebug() << QString("로드 완료: %1, 포인트 수: %2").arg(fileName).arg(points.size());
     }
 
