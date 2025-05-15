@@ -19,7 +19,7 @@ void ProgressDialog::setRange(int min, int max)
     progressBar_->setRange(min, max);
 }
 
-void ProgressDialog::setValue(int value)
+void ProgressDialog::updateProgress(int value)
 {
     progressBar_->setValue(value);
 }

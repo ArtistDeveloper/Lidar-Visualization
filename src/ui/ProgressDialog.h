@@ -12,8 +12,13 @@ public:
     explicit ProgressDialog(QWidget *parent = nullptr);
 
     void setRange(int min, int max);
-    void setValue(int value);
+
+public slots:
+    void updateProgress(int value);
 
 private:
     QProgressBar *progressBar_;
+
+signals:
+    void cancelled();
 };
