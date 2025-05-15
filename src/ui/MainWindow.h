@@ -25,6 +25,8 @@ private:
     MyOpenGLWidget *glWidget_;
     OpenFolderButton *openFolderBtn_;
     std::vector<std::vector<PointXYZI>> chunckPoints_;
+    PointCloudPlayer *player_;
+    PointCloudPlayerWidget *playerWidget_;
 
 signals:
     void dataLoaded(const std::vector<std::vector<PointXYZI>> &data);

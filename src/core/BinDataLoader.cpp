@@ -2,9 +2,6 @@
 
 #include <QDir>
 
-
-
-
 std::vector<std::vector<PointXYZI>> BinDataLoader::loadFromFolder(const QString &folderPath)
 {
     std::vector<std::vector<PointXYZI>> allPoints;
