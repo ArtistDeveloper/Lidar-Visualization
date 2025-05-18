@@ -9,6 +9,14 @@ qt_add_executable(${PROJECT_NAME}
     main.cpp
 )
 
+# resources.qrc 경로는 graphics 하위에 있음
+qt_add_resources(app_resources
+    "../src/graphics/resources.qrc"
+)
+
+# 실행 타겟에 리소스 소스 추가
+target_sources(${PROJECT_NAME} PRIVATE ${app_resources})
+
 # QT6 위젯 라이브러리 링크
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
