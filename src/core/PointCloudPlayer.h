@@ -1,4 +1,3 @@
-// PointCloudPlayer.h
 #pragma once
 
 #include <QObject>

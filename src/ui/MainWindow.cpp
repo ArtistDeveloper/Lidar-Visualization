@@ -93,6 +93,9 @@ void MainWindow::loadFolderData(const QString &folderPath)
     // player_->setData(chunckPoints_);
     playerWidget_->setMaximum(chunckPoints_.size() - 1);
     emit dataLoaded(chunckPoints_);
+
+    // 렌더링 테스트
+    glWidget_->setPointCloudData(chunckPoints_[0]);
 }
 
 void MainWindow::onOpenFolderClikced()

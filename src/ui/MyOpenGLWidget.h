@@ -13,6 +13,7 @@ class MyOpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 public:
     MyOpenGLWidget(QWidget *parent = nullptr);
     ~MyOpenGLWidget();
+    void setPointCloudData(std::vector<PointXYZI>& points);
 
 protected:
     void initializeGL() override;
