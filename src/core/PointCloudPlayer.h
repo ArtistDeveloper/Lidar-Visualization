@@ -10,7 +10,7 @@ class PointCloudPlayer : public QObject {
 
 public:
     explicit PointCloudPlayer(QObject *parent = nullptr);
-    void setData(const std::vector<std::vector<PointXYZI>> &data);
+    void setEntireData(const std::vector<std::vector<PointXYZI>> &data);
     void play();
     void pause();
     void nextFrame();

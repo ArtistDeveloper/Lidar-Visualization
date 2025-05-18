@@ -1,7 +1,14 @@
 #include "PointCloudPlayer.h"
 
+#include <QDebug>
+
 PointCloudPlayer::PointCloudPlayer(QObject *parent) : QObject(parent) {
     // connect(&timer_, &QTimer::timeout, this, &PointCloudPlayer::onTimeout);
+}
+
+void PointCloudPlayer::setEntireData(const std::vector<std::vector<PointXYZI>> &data)
+{
+    data_ = data;
 }
 
 void PointCloudPlayer::play() {

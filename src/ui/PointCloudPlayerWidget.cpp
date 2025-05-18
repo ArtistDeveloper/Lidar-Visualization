@@ -35,8 +35,8 @@ void PointCloudPlayerWidget::setupUI()
 void PointCloudPlayerWidget::createConnection()
 {
     connect(playPauseBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::onPlayPauseClicked);
-    connect(prevBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::prevClicked);
-    connect(nextBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::nextClicked);
+    connect(prevBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::onPrevClicked);
+    connect(nextBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::onNextClicked);
     connect(slider_, &QSlider::sliderMoved, this, &PointCloudPlayerWidget::onSliderMoved);
 }
 
@@ -48,6 +48,16 @@ void PointCloudPlayerWidget::onPlayPauseClicked()
         emit playClicked();
     else
         emit pauseClicked();
+}
+
+void PointCloudPlayerWidget::onPrevClicked()
+{
+    emit prevClicked();
+}
+
+void PointCloudPlayerWidget::onNextClicked()
+{
+    emit nextClicked();
 }
 
 void PointCloudPlayerWidget::onSliderMoved(int value)

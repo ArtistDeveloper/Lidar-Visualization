@@ -21,14 +21,12 @@ void MainWindow::setupUI()
 
     glWidget_ = new MyOpenGLWidget(centralWidget);
     openFolderBtn_ = new OpenFolderButton(glWidget_);
-    // TODO: 에러 나지 않게 구현 추가 필요
     playerWidget_ = new PointCloudPlayerWidget;
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(glWidget_);
     layout->addWidget(playerWidget_);
 
-    // 비율 설정: glWidget 4, playerWidget 1
     layout->setStretch(0, 8); // 첫 번째 위젯 (glWidget_)
     layout->setStretch(1, 1); // 두 번째 위젯 (playerWidget_)
 
@@ -42,19 +40,15 @@ void MainWindow::createConnection()
 {
     player_ = new PointCloudPlayer;
 
+    // 폴더 탐색 버튼 슬롯 연결
     connect(openFolderBtn_, &QPushButton::clicked, this, &MainWindow::onOpenFolderClikced);
 
-    // TODO: Frame Player 만들기 위한 이벤트 연결
-    // connect(player_, &PointCloudPlayer::frameChanged, [=](int index)
-    //         {
-    // if (index < chunckPoints_.size())
-    //     glWidget_->setPointCloudData(chunckPoints_[index]);
-    // playerWidget_->updateSlider(index); });
-    // connect(playerWidget_, &PointCloudPlayerWidget::onPlayPauseClicked, player_, &PointCloudPlayer::play);
-    // connect(playerWidget_, &PointCloudPlayerWidget::pauseClicked, player_, &PointCloudPlayer::pause);
-    // connect(playerWidget_, &PointCloudPlayerWidget::nextClicked, player_, &PointCloudPlayer::nextFrame);
-    // connect(playerWidget_, &PointCloudPlayerWidget::prevClicked, player_, &PointCloudPlayer::prevFrame);
-    // connect(playerWidget_, &PointCloudPlayerWidget::onSliderMoved, player_, &PointCloudPlayer::setFrame);
+    // PointCloudPlayerWidget의 시그널과 PointCloudPlayer의 슬롯 연결
+    connect(playerWidget_, &PointCloudPlayerWidget::playClicked, player_, &PointCloudPlayer::play);
+    connect(playerWidget_, &PointCloudPlayerWidget::pauseClicked, player_, &PointCloudPlayer::pause);
+    connect(playerWidget_, &PointCloudPlayerWidget::nextClicked, player_, &PointCloudPlayer::nextFrame);
+    connect(playerWidget_, &PointCloudPlayerWidget::prevClicked, player_, &PointCloudPlayer::prevFrame);
+    connect(playerWidget_, &PointCloudPlayerWidget::sliderMoved, player_, &PointCloudPlayer::setFrame);
 }
 
 void MainWindow::open()
@@ -79,7 +73,7 @@ void MainWindow::loadFolderData(const QString &folderPath)
     ProgressDialog progressDialog(this);
     progressDialog.setRange(0, totalFiles);
     progressDialog.show();
-    QCoreApplication::processEvents(); // 해당 코드가 있어야, 제대로 동작
+    QCoreApplication::processEvents(); // 해당 코드가 있어야 Progress dialog가 제대로 동작
 
     connect(&loader, &BinDataLoader::progressUpdated, &progressDialog, &ProgressDialog::updateProgress);
 
@@ -90,9 +84,8 @@ void MainWindow::loadFolderData(const QString &folderPath)
 
     // TODO: point 로드 후 player와 연결
     chunckPoints_ = points;
-    // player_->setData(chunckPoints_);
+    player_->setEntireData(chunckPoints_);
     playerWidget_->setMaximum(chunckPoints_.size() - 1);
-    emit dataLoaded(chunckPoints_);
 
     // 렌더링 테스트
     glWidget_->setPointCloudData(chunckPoints_[0]);
