@@ -6,13 +6,13 @@
 
 #include "BinLoader.h"
 
-class MyOpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
+class PointCloudViewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 
 public:
-    MyOpenGLWidget(QWidget *parent = nullptr);
-    ~MyOpenGLWidget();
+    PointCloudViewer(QWidget *parent = nullptr);
+    ~PointCloudViewer();
     void setPointCloudData(std::vector<PointXYZI>& points);
 
 protected:

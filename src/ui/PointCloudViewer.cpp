@@ -1,15 +1,15 @@
 #include <QDebug>
 
-#include "MyOpenGLWidget.h"
+#include "PointCloudViewer.h"
 #include "BinLoader.h"
 #include "ShaderProgram.h"
 
-MyOpenGLWidget::MyOpenGLWidget(QWidget *parent)
+PointCloudViewer::PointCloudViewer(QWidget *parent)
     : QOpenGLWidget(parent)
 {
 }
 
-MyOpenGLWidget::~MyOpenGLWidget()
+PointCloudViewer::~PointCloudViewer()
 {
     makeCurrent();
     glDeleteVertexArrays(1, &m_vao);
@@ -18,7 +18,7 @@ MyOpenGLWidget::~MyOpenGLWidget()
     doneCurrent();
 }
 
-void MyOpenGLWidget::initializeGL()
+void PointCloudViewer::initializeGL()
 {
     initializeOpenGLFunctions();
 
@@ -45,12 +45,12 @@ void MyOpenGLWidget::initializeGL()
     // glEnable(GL_DEPTH_TEST);
 }
 
-void MyOpenGLWidget::resizeGL(int w, int h)
+void PointCloudViewer::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
 }
 
-void MyOpenGLWidget::paintGL()
+void PointCloudViewer::paintGL()
 {
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -64,7 +64,7 @@ void MyOpenGLWidget::paintGL()
     m_program->release();
 }
 
-void MyOpenGLWidget::setPointCloudData(std::vector<PointXYZI> &points)
+void PointCloudViewer::setPointCloudData(std::vector<PointXYZI> &points)
 {
     makeCurrent();
 

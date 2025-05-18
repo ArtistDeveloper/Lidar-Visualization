@@ -1,5 +1,5 @@
 add_library(ui STATIC
-    MyOpenGLWidget.cpp MyOpenGLWidget.h
+    PointCloudViewer.cpp PointCloudViewer.h
     MainWindow.cpp MainWindow.h
     OpenFolderButton.cpp OpenFolderButton.h
     ProgressDialog.cpp ProgressDialog.h

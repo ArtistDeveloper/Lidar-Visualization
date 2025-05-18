@@ -19,7 +19,7 @@ void MainWindow::setupUI()
 {
     QWidget *centralWidget = new QWidget;
 
-    glWidget_ = new MyOpenGLWidget(centralWidget);
+    glWidget_ = new PointCloudViewer(centralWidget);
     openFolderBtn_ = new OpenFolderButton(glWidget_);
     playerWidget_ = new PointCloudPlayerWidget;
 

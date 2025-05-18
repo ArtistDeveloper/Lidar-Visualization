@@ -5,7 +5,7 @@
 #include <QProgressBar>
 
 #include "OpenFolderButton.h"
-#include "MyOpenGLWidget.h"
+#include "PointCloudViewer.h"
 #include "PointCloudPlayer.h"
 #include "PointCloudPlayerWidget.h"
 
@@ -22,7 +22,7 @@ private:
     void open();
     void loadFolderData(const QString &folderPath);
 
-    MyOpenGLWidget *glWidget_;
+    PointCloudViewer *glWidget_;
     OpenFolderButton *openFolderBtn_;
     std::vector<std::vector<PointXYZI>> chunckPoints_;
     PointCloudPlayer *player_;

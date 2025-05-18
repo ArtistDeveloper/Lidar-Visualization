@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QWidget>
 
-#include "MyOpenGLWidget.h"
+#include "PointCloudViewer.h"
 #include "BinLoader.h"
 #include "MainWindow.h"
 
