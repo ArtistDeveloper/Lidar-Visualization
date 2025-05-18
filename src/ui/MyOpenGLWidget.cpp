@@ -2,6 +2,7 @@
 
 #include "MyOpenGLWidget.h"
 #include "BinLoader.h"
+#include "ShaderProgram.h"
 
 MyOpenGLWidget::MyOpenGLWidget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -42,6 +43,8 @@ void MyOpenGLWidget::initializeGL()
             FragColor = vec4(1.0, 1.0, 1.0, 1.0); // white
         }
     )";
+
+    auto test = ShaderProgram::create("./src/shader/pointcloud.vs", "./src/shader/pointcloud.fs");
 
     m_program = new QOpenGLShaderProgram();
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSrc);
