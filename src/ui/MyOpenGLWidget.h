@@ -20,7 +20,7 @@ protected:
     void paintGL() override;
 
 private:
-    QOpenGLShaderProgram *m_program = nullptr;
+    std::unique_ptr<QOpenGLShaderProgram> m_program = nullptr;
     GLuint m_vao = 0;
     GLuint m_vbo = 0;
 

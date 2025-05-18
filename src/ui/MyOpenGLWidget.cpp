@@ -14,7 +14,7 @@ MyOpenGLWidget::~MyOpenGLWidget()
     makeCurrent();
     glDeleteVertexArrays(1, &m_vao);
     glDeleteBuffers(1, &m_vbo);
-    delete m_program;
+    m_program.reset();
     doneCurrent();
 }
 
@@ -26,30 +26,7 @@ void MyOpenGLWidget::initializeGL()
     std::string path = "C:/Users/ParkJunsu/Desktop/raw_data_downloader/2011_09_28/2011_09_28_drive_0001_sync/velodyne_points/data/0000000000.bin";
     m_pointCloud = BinLoader::loadKittiBinFile(path);
 
-    // Shader
-    static const char *vertexShaderSrc = R"(
-    #version 330 core
-    layout(location = 0) in vec3 position;
-    void main() {
-            gl_PointSize = 2.0;
-            gl_Position = vec4(position * 0.02, 1.0); // point cloud를 시각화 하기 위해 scaling 테스트
-        }
-    )";
-
-    static const char *fragmentShaderSrc = R"(
-        #version 330 core
-        out vec4 FragColor;
-        void main() {
-            FragColor = vec4(1.0, 1.0, 1.0, 1.0); // white
-        }
-    )";
-
-    auto test = ShaderProgram::create("./src/shader/pointcloud.vs", "./src/shader/pointcloud.fs");
-
-    m_program = new QOpenGLShaderProgram();
-    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSrc);
-    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSrc);
-    m_program->link();
+    m_program = ShaderProgram::create(":/shader/pointcloud.vs", ":/shader/pointcloud.fs");
 
     // OpenGL Buffer
     glGenVertexArrays(1, &m_vao);
