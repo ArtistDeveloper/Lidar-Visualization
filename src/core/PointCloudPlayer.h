@@ -5,7 +5,8 @@
 
 #include "BinLoader.h"
 
-class PointCloudPlayer : public QObject {
+class PointCloudPlayer : public QObject
+{
     Q_OBJECT
 
 public:

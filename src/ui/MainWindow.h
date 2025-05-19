@@ -24,7 +24,6 @@ private:
 
     PointCloudViewer *glWidget_;
     OpenFolderButton *openFolderBtn_;
-    std::vector<std::vector<PointXYZI>> chunckPoints_;
     PointCloudPlayer *player_;
     PointCloudPlayerWidget *playerWidget_;
 

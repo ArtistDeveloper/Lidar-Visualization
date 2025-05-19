@@ -64,7 +64,6 @@ void MainWindow::open()
 void MainWindow::loadFolderData(const QString &folderPath)
 {
     QDir dir(folderPath);
-    chunckPoints_.clear();
     QStringList binFiles = dir.entryList(QStringList() << "*.bin", QDir::Files);
     int totalFiles = binFiles.size();
 
@@ -82,13 +81,11 @@ void MainWindow::loadFolderData(const QString &folderPath)
 
     progressDialog.close();
 
-    // TODO: point 로드 후 player와 연결
-    chunckPoints_ = points;
-    player_->setEntireData(chunckPoints_);
-    playerWidget_->setMaximum(chunckPoints_.size() - 1);
+    player_->setEntireData(points);
+    playerWidget_->setMaximum(points.size() - 1);
 
     // 렌더링 테스트
-    glWidget_->setPointCloudData(chunckPoints_[0]);
+    glWidget_->setPointCloudData(points[0]);
 }
 
 void MainWindow::onOpenFolderClikced()
