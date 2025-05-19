@@ -21,6 +21,7 @@ void PointCloudPlayerWidget::setupUI()
     slider_->setMinimum(0);
     slider_->setTickPosition(QSlider::TicksBelow);
     slider_->setSingleStep(1);
+    slider_->setTickPosition(QSlider::NoTicks);
 
     auto layout = new QHBoxLayout;
     layout->addWidget(prevBtn_);
@@ -37,7 +38,9 @@ void PointCloudPlayerWidget::createConnection()
     connect(playPauseBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::onPlayPauseClicked);
     connect(prevBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::onPrevClicked);
     connect(nextBtn_, &QPushButton::clicked, this, &PointCloudPlayerWidget::onNextClicked);
+
     connect(slider_, &QSlider::sliderMoved, this, &PointCloudPlayerWidget::onSliderMoved);
+    connect(slider_, &QSlider::valueChanged, this, &PointCloudPlayerWidget::onSliderValueChanged);
 }
 
 void PointCloudPlayerWidget::onPlayPauseClicked()
@@ -62,7 +65,15 @@ void PointCloudPlayerWidget::onNextClicked()
 
 void PointCloudPlayerWidget::onSliderMoved(int value)
 {
-    emit sliderMoved(value);  // 이게 player_->setFrame(value)로 연결됨
+    emit sliderMoved(value); // 이게 player_->setFrame(value)로 연결됨
+}
+
+void PointCloudPlayerWidget::onSliderValueChanged(int value)
+{
+    if (!slider_->isSliderDown())
+    {
+        emit sliderMoved(value);
+    }
 }
 
 void PointCloudPlayerWidget::updateSlider(int index)

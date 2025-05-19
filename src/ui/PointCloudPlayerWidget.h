@@ -28,6 +28,7 @@ public slots:
 private slots:
     void onPlayPauseClicked();
     void onSliderMoved(int value);
+    void onSliderValueChanged(int value);
     void onPrevClicked();
     void onNextClicked();
 
