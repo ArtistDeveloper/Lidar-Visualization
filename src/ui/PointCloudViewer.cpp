@@ -64,7 +64,7 @@ void PointCloudViewer::paintGL()
     m_program->release();
 }
 
-void PointCloudViewer::setPointCloudData(std::vector<PointXYZI> &points)
+void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &points)
 {
     makeCurrent();
 

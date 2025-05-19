@@ -10,6 +10,7 @@ PointCloudPlayer::PointCloudPlayer(QObject *parent) : QObject(parent)
 void PointCloudPlayer::setEntireData(const std::vector<std::vector<PointXYZI>> &data)
 {
     data_ = data;
+    emit frameChanged(data_[0]);
 }
 
 void PointCloudPlayer::play()
@@ -24,7 +25,14 @@ void PointCloudPlayer::pause()
 
 void PointCloudPlayer::nextFrame()
 {
-    throw std::logic_error("nextFrame() is not implemented yet.");
+    if (data_.empty())
+        return;
+
+    if (currentFrame_ < static_cast<int>(data_.size()) - 1)
+    {
+        ++currentFrame_;
+        emit frameChanged(data_[currentFrame_]);
+    }
 }
 
 void PointCloudPlayer::prevFrame()

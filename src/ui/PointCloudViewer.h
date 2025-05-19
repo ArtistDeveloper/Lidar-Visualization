@@ -13,7 +13,9 @@ class PointCloudViewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Co
 public:
     PointCloudViewer(QWidget *parent = nullptr);
     ~PointCloudViewer();
-    void setPointCloudData(std::vector<PointXYZI>& points);
+
+public slots:
+    void setPointCloudData(const std::vector<PointXYZI>& points);
 
 protected:
     void initializeGL() override;

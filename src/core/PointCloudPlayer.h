@@ -22,13 +22,13 @@ public:
     int totalFrames() const;
 
 signals:
-    void frameChanged(int index);
+    void frameChanged(const std::vector<PointXYZI>& frame);
 
 private slots:
     void onTimeout();
 
 private:
     std::vector<std::vector<PointXYZI>> data_;
-    int currentIndex_ = 0;
+    int currentFrame_ = 0;
     QTimer timer_;
 };

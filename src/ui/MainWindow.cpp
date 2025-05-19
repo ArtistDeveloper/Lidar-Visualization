@@ -49,6 +49,9 @@ void MainWindow::createConnection()
     connect(playerWidget_, &PointCloudPlayerWidget::nextClicked, player_, &PointCloudPlayer::nextFrame);
     connect(playerWidget_, &PointCloudPlayerWidget::prevClicked, player_, &PointCloudPlayer::prevFrame);
     connect(playerWidget_, &PointCloudPlayerWidget::sliderMoved, player_, &PointCloudPlayer::setFrame);
+
+    // PointCloudPlayer와 glWidget의 연결
+    connect(player_, &PointCloudPlayer::frameChanged, glWidget_, &PointCloudViewer::setPointCloudData);
 }
 
 void MainWindow::open()
@@ -84,8 +87,8 @@ void MainWindow::loadFolderData(const QString &folderPath)
     player_->setEntireData(points);
     playerWidget_->setMaximum(points.size() - 1);
 
-    // 렌더링 테스트
-    glWidget_->setPointCloudData(points[0]);
+    // // 렌더링 테스트
+    // glWidget_->setPointCloudData(points[0]);
 }
 
 void MainWindow::onOpenFolderClikced()
