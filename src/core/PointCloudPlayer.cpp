@@ -32,6 +32,7 @@ void PointCloudPlayer::nextFrame()
     {
         ++currentFrame_;
         emit frameChanged(data_[currentFrame_]);
+        emit frameIndexChanged(currentFrame_);
     }
 }
 
@@ -44,6 +45,7 @@ void PointCloudPlayer::prevFrame()
     {
         --currentFrame_;
         emit frameChanged(data_[currentFrame_]);
+        emit frameIndexChanged(currentFrame_);
     }
 }
 

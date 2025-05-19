@@ -35,8 +35,8 @@ private:
     void setupUI();
     void createConnection();
 
-    QLabel *minLabel_;
-    QLabel *maxLabel_;
+    QLabel *currentFrameLabel_;
+    QLabel *maxFrameLabel_;
     QPushButton *playPauseBtn_;
     QPushButton *nextBtn_;
     QPushButton *prevBtn_;

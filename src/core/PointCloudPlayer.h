@@ -23,6 +23,7 @@ public:
 
 signals:
     void frameChanged(const std::vector<PointXYZI>& frame);
+    void frameIndexChanged(int index);
 
 private slots:
     void onTimeout();
