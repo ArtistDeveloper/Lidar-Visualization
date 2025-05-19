@@ -5,6 +5,8 @@
 PointCloudPlayer::PointCloudPlayer(QObject *parent) : QObject(parent)
 {
     // connect(&timer_, &QTimer::timeout, this, &PointCloudPlayer::onTimeout);
+    connect(&timer_, &QTimer::timeout, this, &PointCloudPlayer::onTimeout);
+    timer_.setInterval(500);  // 0.5초 간격
 }
 
 void PointCloudPlayer::setEntireData(const std::vector<std::vector<PointXYZI>> &data)
@@ -15,12 +17,13 @@ void PointCloudPlayer::setEntireData(const std::vector<std::vector<PointXYZI>> &
 
 void PointCloudPlayer::play()
 {
-    throw std::logic_error("play() is not implemented yet.");
+    if (!timer_.isActive())
+        timer_.start();
 }
 
 void PointCloudPlayer::pause()
 {
-    throw std::logic_error("pause() is not implemented yet.");
+    timer_.stop();
 }
 
 void PointCloudPlayer::nextFrame()
@@ -71,5 +74,10 @@ int PointCloudPlayer::totalFrames() const
 
 void PointCloudPlayer::onTimeout()
 {
-    throw std::logic_error("onTimeout() is not implemented yet.");
+    if (currentFrame_ >= static_cast<int>(data_.size()) - 1) {
+        timer_.stop();  // 끝에 도달 시 자동 정지
+        return;
+    }
+
+    nextFrame();
 }
