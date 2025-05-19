@@ -37,7 +37,14 @@ void PointCloudPlayer::nextFrame()
 
 void PointCloudPlayer::prevFrame()
 {
-    throw std::logic_error("prevFrame() is not implemented yet.");
+    if (data_.empty())
+        return;
+
+    if (currentFrame_ > 0)
+    {
+        --currentFrame_;
+        emit frameChanged(data_[currentFrame_]);
+    }
 }
 
 void PointCloudPlayer::setFrame(int index)

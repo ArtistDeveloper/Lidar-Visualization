@@ -86,9 +86,6 @@ void MainWindow::loadFolderData(const QString &folderPath)
 
     player_->setEntireData(points);
     playerWidget_->setMaximum(points.size() - 1);
-
-    // // 렌더링 테스트
-    // glWidget_->setPointCloudData(points[0]);
 }
 
 void MainWindow::onOpenFolderClikced()
