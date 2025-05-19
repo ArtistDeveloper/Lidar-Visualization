@@ -54,6 +54,7 @@ void MainWindow::createConnection()
     connect(playerWidget_, &PointCloudPlayerWidget::sliderMoved, player_, &PointCloudPlayer::setFrame);
     connect(player_, &PointCloudPlayer::frameChanged, glWidget_, &PointCloudViewer::setPointCloudData);
     connect(player_, &PointCloudPlayer::frameIndexChanged, playerWidget_, &PointCloudPlayerWidget::updateSlider);
+    connect(player_, &PointCloudPlayer::playbackStopped, playerWidget_, &PointCloudPlayerWidget::stopPlayback);
 }
 
 void MainWindow::open()

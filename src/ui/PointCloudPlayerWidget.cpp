@@ -87,3 +87,11 @@ void PointCloudPlayerWidget::setMaximum(int maxFrameIndex)
     slider_->setMaximum(maxFrameIndex);
     maxFrameLabel_->setText(QString::number(maxFrameIndex));
 }
+
+void PointCloudPlayerWidget::stopPlayback()
+{
+    if (isPlaying_) {
+        isPlaying_ = false;
+        playPauseBtn_->setText("Play");
+    }
+}

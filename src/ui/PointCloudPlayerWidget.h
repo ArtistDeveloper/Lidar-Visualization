@@ -24,6 +24,7 @@ signals:
 
 public slots:
     void updateSlider(int index); // 외부에서 현재 프레임을 반영
+    void stopPlayback();
 
 private slots:
     void onPlayPauseClicked();

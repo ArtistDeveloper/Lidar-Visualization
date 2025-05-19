@@ -24,6 +24,7 @@ public:
 signals:
     void frameChanged(const std::vector<PointXYZI>& frame);
     void frameIndexChanged(int index);
+    void playbackStopped();
 
 private slots:
     void onTimeout();
