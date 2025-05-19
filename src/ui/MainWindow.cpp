@@ -51,6 +51,7 @@ void MainWindow::createConnection()
     connect(playerWidget_, &PointCloudPlayerWidget::sliderMoved, player_, &PointCloudPlayer::setFrame);
 
     // PointCloudPlayer와 glWidget의 연결
+    connect(playerWidget_, &PointCloudPlayerWidget::sliderMoved, player_, &PointCloudPlayer::setFrame);
     connect(player_, &PointCloudPlayer::frameChanged, glWidget_, &PointCloudViewer::setPointCloudData);
     connect(player_, &PointCloudPlayer::frameIndexChanged, playerWidget_, &PointCloudPlayerWidget::updateSlider);
 }

@@ -51,12 +51,17 @@ void PointCloudPlayer::prevFrame()
 
 void PointCloudPlayer::setFrame(int index)
 {
-    throw std::logic_error("setFrame() is not implemented yet.");
+    if (data_.empty() || index < 0 || index >= static_cast<int>(data_.size()))
+        return;
+
+    currentFrame_ = index;
+    emit frameChanged(data_[currentFrame_]);
+    emit frameIndexChanged(currentFrame_);
 }
 
 int PointCloudPlayer::currentFrame() const
 {
-    throw std::logic_error("currentFrame() is not implemented yet.");
+    return currentFrame_;
 }
 
 int PointCloudPlayer::totalFrames() const

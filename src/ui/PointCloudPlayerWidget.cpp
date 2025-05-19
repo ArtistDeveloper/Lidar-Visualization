@@ -62,7 +62,7 @@ void PointCloudPlayerWidget::onNextClicked()
 
 void PointCloudPlayerWidget::onSliderMoved(int value)
 {
-    emit sliderMoved(value);
+    emit sliderMoved(value);  // 이게 player_->setFrame(value)로 연결됨
 }
 
 void PointCloudPlayerWidget::updateSlider(int index)
