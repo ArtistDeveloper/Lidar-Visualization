@@ -56,7 +56,7 @@ cmake --build build
 
 ## Usage
 1. Launch the application from the generated build directory.
-2. Use the file menu or UI to load a .bin point cloud file.
+2. Use the file menu UI to load a .bin point cloud file.
 3. Visualize and explore the data using the playback and camera control features.
 
 <br/>
