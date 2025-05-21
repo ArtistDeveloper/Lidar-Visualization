@@ -3,7 +3,7 @@
 ## Introduction
 Lidar-Visualization is a CMake-based Qt project that serves as a desktop application focused on the real-time visualization of large point cloud data using OpenGL. The project is designed to load a `.bin` file from the KITTI dataset, enabling users to explore and playback the data through an intuitive user interface.
 
-<img src="./assets/ui_preview.png" alt="UI Preview" width="400"/>
+<img src="./assets/sample_frame.png" alt="UI Preview" width="400"/>
 
 <br/>
 
