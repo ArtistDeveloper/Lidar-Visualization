@@ -17,6 +17,7 @@ Lidar-Visualization is a CMake-based Qt project that serves as a desktop applica
   - [Dependencies](#dependencies)
   - [Installation](#installation)
   - [Usage](#usage)
+  - [To Do](#to-do)
 
 <br/>
 
@@ -45,6 +46,7 @@ cd Lidar-Visualization
 
 # Run cmake (Set your own Qt path)
 cmake -B build -DCMAKE_PREFIX_PATH="C:/Path/To/Your/QtVersion"
+# example: cmake -B build -DCMAKE_PREFIX_PATH="C:/Qt/6.8.3/msvc2022_64"
 
 # Build the project
 cmake --build build
@@ -57,7 +59,8 @@ cmake --build build
 2. Use the file menu or UI to load a .bin point cloud file.
 3. Visualize and explore the data using the playback and camera control features.
 
+<br/>
 
-To Do
+## To Do
 - [ ] Add support for camera viewpoint manipulation (rotation, zoom, pan)
 - [ ] Add 2D grid overlay
