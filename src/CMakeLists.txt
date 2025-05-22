@@ -24,9 +24,6 @@ target_link_libraries(${PROJECT_NAME}
         ui
         core
         graphics
-        Qt6::Widgets 
-        Qt6::OpenGL 
-        Qt6::OpenGLWidgets
 )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
