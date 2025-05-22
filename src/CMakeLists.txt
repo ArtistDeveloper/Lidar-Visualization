@@ -1,3 +1,4 @@
+# add_subdirectory는 최상단에 두어야 각 디렉토리에 정의한 타겟을 해당 파일에서 사용 가능
 add_subdirectory(ui)
 add_subdirectory(core)
 add_subdirectory(graphics)
@@ -17,7 +18,7 @@ qt_add_resources(app_resources
 # 실행 타겟에 리소스 소스 추가
 target_sources(${PROJECT_NAME} PRIVATE ${app_resources})
 
-# QT6 위젯 라이브러리 링크
+
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         ui
