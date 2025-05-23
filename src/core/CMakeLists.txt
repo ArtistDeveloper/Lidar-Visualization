@@ -1,6 +1,4 @@
 add_library(core STATIC
-    BinLoader.cpp BinLoader.h
-    BinDataLoader.cpp BinDataLoader.h
     player/PointCloudPlayer.cpp player/PointCloudPlayer.h
 )
 
@@ -10,5 +8,7 @@ target_include_directories(core PUBLIC
 )
 
 target_link_libraries(core
-    PUBLIC Qt6::Widgets
+    PUBLIC 
+    Qt6::Widgets
+    io
 )
