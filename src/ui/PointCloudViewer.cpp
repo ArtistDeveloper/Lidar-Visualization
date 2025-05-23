@@ -1,7 +1,7 @@
 #include <QDebug>
 
 #include "PointCloudViewer.h"
-#include "BinLoader.h"
+#include "PointTypes.h"
 #include "ShaderProgram.h"
 
 PointCloudViewer::PointCloudViewer(QWidget *parent)

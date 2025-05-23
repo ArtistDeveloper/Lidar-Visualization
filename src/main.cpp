@@ -2,7 +2,7 @@
 #include <QWidget>
 
 #include "PointCloudViewer.h"
-#include "BinLoader.h"
+#include "PointTypes.h"
 #include "MainWindow.h"
 
 int main(int argc, char *argv[])

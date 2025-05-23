@@ -4,7 +4,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 
-#include "BinLoader.h"
+#include "PointTypes.h"
 
 class PointCloudViewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {

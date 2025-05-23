@@ -3,9 +3,9 @@
 #include <QObject>
 #include <QVector>
 
-#include "BinLoader.h"
+#include "KittiBinFileReader.h"
 
-class BinDataLoader : public QObject
+class KittiBinDirectoryLoader : public QObject
 {
     Q_OBJECT
 public:

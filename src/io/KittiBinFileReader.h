@@ -3,12 +3,9 @@
 #include <vector>
 #include <fstream>
 
-struct PointXYZI
-{
-    float x, y, z, intensity;
-};
+#include "PointTypes.h"
 
-class BinLoader
+class KittiBinFileReader
 {
 public:
     static std::vector<PointXYZI> loadKittiBinFile(const std::string &file_path);

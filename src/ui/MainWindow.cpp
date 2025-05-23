@@ -4,10 +4,10 @@
 #include <QFileDialog>
 #include <QCoreApplication>
 
-#include "BinLoader.h"
+#include "PointTypes.h"
 #include "OpenFolderButton.h"
 #include "ProgressDialog.h"
-#include "BinDataLoader.h"
+#include "KittiBinDirectoryLoader.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
@@ -73,14 +73,14 @@ void MainWindow::loadFolderData(const QString &folderPath)
     QStringList binFiles = dir.entryList(QStringList() << "*.bin", QDir::Files);
     int totalFiles = binFiles.size();
 
-    BinDataLoader loader;
+    KittiBinDirectoryLoader loader;
 
     ProgressDialog progressDialog(this);
     progressDialog.setRange(0, totalFiles);
     progressDialog.show();
     QCoreApplication::processEvents(); // 해당 코드가 있어야 Progress dialog가 제대로 동작
 
-    connect(&loader, &BinDataLoader::progressUpdated, &progressDialog, &ProgressDialog::updateProgress);
+    connect(&loader, &KittiBinDirectoryLoader::progressUpdated, &progressDialog, &ProgressDialog::updateProgress);
 
     std::vector<std::vector<PointXYZI>> points = loader.loadFromFolder(folderPath);
     qDebug() << QString("points.size: %1").arg(points.size());

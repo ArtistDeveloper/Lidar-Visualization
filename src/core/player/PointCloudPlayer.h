@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QTimer>
 
-#include "BinLoader.h"
+#include "PointTypes.h"
 
 class PointCloudPlayer : public QObject
 {

@@ -1,6 +1,7 @@
 add_library(io STATIC
-    BinLoader.cpp BinLoader.h
-    BinDataLoader.cpp BinDataLoader.h
+    PointTypes.h
+    KittiBinFileReader.cpp KittiBinFileReader.h
+    KittiBinDirectoryLoader.cpp KittiBinDirectoryLoader.h
 )
 
 target_include_directories(io PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
