@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QWidget>
 
-#include "PointCloudViewer.h"
+// #include "PointCloudViewer.h"
 #include "PointTypes.h"
 #include "MainWindow.h"
 
