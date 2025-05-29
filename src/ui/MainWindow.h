@@ -4,7 +4,7 @@
 #include <QPushButton>
 #include <QProgressBar>
 
-#include "OpenFolderButton.h"
+#include "LoadFolderButton.h"
 #include "PointCloudViewer.h"
 #include "PointCloudPlayer.h"
 #include "PointCloudPlayerWidget.h"
@@ -23,7 +23,7 @@ private:
     void loadFolderData(const QString &folderPath);
 
     PointCloudViewer *glWidget_;
-    OpenFolderButton *openFolderBtn_;
+    LoadFolderButton *openFolderBtn_;
     PointCloudPlayer *player_;
     PointCloudPlayerWidget *playerWidget_;
 

@@ -1,12 +1,13 @@
 add_library(ui STATIC
     MainWindow.cpp MainWindow.h
-    OpenFolderButton.cpp OpenFolderButton.h
+    buttons/LoadFolderButton.cpp buttons/LoadFolderButton.h
     widgets/PointCloudViewer.cpp widgets/PointCloudViewer.h
     widgets/PointCloudPlayerWidget.cpp widgets/PointCloudPlayerWidget.h
     dialogs/ProgressDialog.cpp dialogs/ProgressDialog.h
 )
 
 target_include_directories(ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/buttons)
 target_include_directories(ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/widgets)
 target_include_directories(ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/dialogs)
 

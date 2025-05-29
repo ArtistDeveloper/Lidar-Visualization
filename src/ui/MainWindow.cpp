@@ -5,7 +5,6 @@
 #include <QCoreApplication>
 
 #include "PointTypes.h"
-#include "OpenFolderButton.h"
 #include "ProgressDialog.h"
 #include "KittiBinDirectoryLoader.h"
 
@@ -20,7 +19,7 @@ void MainWindow::setupUI()
     QWidget *centralWidget = new QWidget;
 
     glWidget_ = new PointCloudViewer(centralWidget);
-    openFolderBtn_ = new OpenFolderButton(glWidget_);
+    openFolderBtn_ = new LoadFolderButton(glWidget_);
     playerWidget_ = new PointCloudPlayerWidget;
 
     QVBoxLayout *layout = new QVBoxLayout;
