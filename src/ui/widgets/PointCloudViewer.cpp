@@ -1,6 +1,8 @@
-#include <QDebug>
-
 #include "PointCloudViewer.h"
+
+#include <QDebug>
+#include <QMouseEvent>
+
 #include "PointTypes.h"
 #include "ShaderProgram.h"
 
@@ -20,6 +22,9 @@ PointCloudViewer::~PointCloudViewer()
 
 void PointCloudViewer::initializeGL()
 {
+    m_viewMatrix.lookAt(m_eye, m_center, m_up);
+    // setFocusPolicy(Qt::StrongFocus); // 키보드 및 마우스 포커스를 받도록 설정
+    // setMouseTracking(true);          // 마우스 무브 추적 (마우스 클릭 없이도 움직임 감지 가능)
     initializeOpenGLFunctions();
 
     // 셰이더 프로그램 생성
@@ -40,14 +45,17 @@ void PointCloudViewer::initializeGL()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    
+
     // NOTE: Point Cloud의 depth에 따른 렌더링 순서가 이상한 것 같으면 추후 활성화
-    // glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void PointCloudViewer::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
+    m_projMatrix.setToIdentity();
+    m_projMatrix.perspective(45.0f, float(w) / float(h), 0.1f, 100.0f);
+    // m_projMatrix.perspective(45.0f, float(w) / float(h), 0.01f, 500.0f);
 }
 
 void PointCloudViewer::paintGL()
@@ -56,11 +64,15 @@ void PointCloudViewer::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_program->bind();
+
+    // MVP 행렬 계산 및 전송
+    QMatrix4x4 mvp = m_projMatrix * m_viewMatrix;
+    m_program->setUniformValue("u_mvp", mvp);
+
     glBindVertexArray(m_vao);
-
     glDrawArrays(GL_POINTS, 0, m_pointCloud.size());
-
     glBindVertexArray(0);
+
     m_program->release();
 }
 
@@ -74,5 +86,99 @@ void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &points)
     glBufferData(GL_ARRAY_BUFFER, m_pointCloud.size() * sizeof(PointXYZI), m_pointCloud.data(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    update();
+}
+
+void PointCloudViewer::mousePressEvent(QMouseEvent *event)
+{
+    m_lastMousePos = event->pos();
+}
+
+void PointCloudViewer::mouseMoveEvent(QMouseEvent *event)
+{
+    int dx = event->x() - m_lastMousePos.x();
+    int dy = event->y() - m_lastMousePos.y();
+
+    if (event->buttons() & Qt::LeftButton) {
+        QVector3D prevEye = m_eye; // 백업
+
+        QMatrix4x4 rotation;
+        rotation.rotate(m_rotationSpeed * dx, m_up);
+        QVector3D viewDir = m_eye - m_center;
+        QVector3D right = QVector3D::crossProduct(viewDir, m_up).normalized();
+        rotation.rotate(m_rotationSpeed * dy, right);
+
+        viewDir = rotation * viewDir;
+
+        // 길이가 너무 작으면 렌더링이 불안정해짐
+        if (viewDir.lengthSquared() < 1e-8f) {
+            return;
+        }
+
+        m_eye = m_center + viewDir;
+
+        // lookAt에 사용할 뷰 벡터 보정 (길이 너무 작으면 강제 증가)
+        QVector3D correctedView = m_eye - m_center;
+        float distance = correctedView.length();
+        if (distance < 0.01f) {
+            m_eye = m_center + correctedView.normalized() * 0.01f;
+        }
+
+        // Up 벡터가 너무 평행하면 회전 적용 안 함
+        QVector3D newViewDir = (m_center - m_eye).normalized();
+        float dot = QVector3D::dotProduct(newViewDir, m_up.normalized());
+        if (std::abs(dot) > 0.99f) {
+            m_eye = prevEye;  // 복원
+            return;
+        }
+
+        m_viewMatrix.setToIdentity();
+        m_viewMatrix.lookAt(m_eye, m_center, m_up);
+        update();
+    }
+
+    m_lastMousePos = event->pos();
+}
+
+
+// void PointCloudViewer::mouseMoveEvent(QMouseEvent *event)
+// {
+//     int dx = event->x() - m_lastMousePos.x();
+//     int dy = event->y() - m_lastMousePos.y();
+
+//     if (event->buttons() & Qt::LeftButton) {
+//         QMatrix4x4 rotation;
+//         rotation.rotate(m_rotationSpeed * dx, m_up);
+//         QVector3D viewDir = m_eye - m_center;
+//         QVector3D right = QVector3D::crossProduct(viewDir, m_up).normalized();
+//         rotation.rotate(m_rotationSpeed * dy, right);
+
+//         viewDir = rotation * viewDir;
+//         m_eye = m_center + viewDir;
+
+//         // 새 up 벡터가 너무 기울어졌는지 점검
+//         QVector3D newViewDir = (m_center - m_eye).normalized();
+//         float dot = QVector3D::dotProduct(newViewDir, m_up.normalized());
+
+//         if (std::abs(dot) > 0.99f) {
+//             // 카메라가 거의 수직으로 기울어졌다면 회전 적용을 막음
+//             return;
+//         }
+
+//         m_viewMatrix.setToIdentity();
+//         m_viewMatrix.lookAt(m_eye, m_center, m_up);
+//         update();
+//     }
+
+//     m_lastMousePos = event->pos();
+// }
+
+void PointCloudViewer::wheelEvent(QWheelEvent *event)
+{
+    m_zoom *= std::pow(1.001f, event->angleDelta().y());
+    QVector3D viewDir = (m_eye - m_center).normalized();
+    m_eye = m_center + viewDir * (3.0f / m_zoom); // 3.0f은 초기 거리
+    m_viewMatrix.setToIdentity();
+    m_viewMatrix.lookAt(m_eye, m_center, m_up);
     update();
 }

@@ -15,12 +15,16 @@ public:
     ~PointCloudViewer();
 
 public slots:
-    void setPointCloudData(const std::vector<PointXYZI>& points);
+    void setPointCloudData(const std::vector<PointXYZI> &points);
 
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void paintGL() override;
+
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 private:
     std::unique_ptr<QOpenGLShaderProgram> m_program = nullptr;
@@ -28,4 +32,14 @@ private:
     GLuint m_vbo = 0;
 
     std::vector<PointXYZI> m_pointCloud;
+
+    // Arcball Camera
+    QMatrix4x4 m_viewMatrix;
+    QMatrix4x4 m_projMatrix;
+    QVector3D m_eye = {0.0f, 0.0f, 3.0f};
+    QVector3D m_center = {0.0f, 0.0f, 0.0f};
+    QVector3D m_up = {0.0f, 1.0f, 0.0f};
+    QPoint m_lastMousePos;
+    float m_rotationSpeed = 0.5f;
+    float m_zoom = 1.0f;
 };
