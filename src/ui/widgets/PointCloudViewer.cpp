@@ -94,33 +94,38 @@ void PointCloudViewer::mousePressEvent(QMouseEvent *event)
     m_lastMousePos = event->pos();
 }
 
+void PointCloudViewer::updateViewMatrix()
+{
+    float yawRad = qDegreesToRadians(m_yaw);
+    float pitchRad = qDegreesToRadians(m_pitch);
+
+    QVector3D offset;
+    offset.setX(m_radius * std::cos(pitchRad) * std::sin(yawRad));
+    offset.setY(m_radius * std::sin(pitchRad));
+    offset.setZ(m_radius * std::cos(pitchRad) * std::cos(yawRad));
+
+    m_eye = m_center + offset;
+    m_up = {0, 1, 0};
+
+    m_viewMatrix.setToIdentity();
+    m_viewMatrix.lookAt(m_eye, m_center, m_up);
+    update();
+}
+
 void PointCloudViewer::mouseMoveEvent(QMouseEvent *event)
 {
     int dx = event->x() - m_lastMousePos.x();
     int dy = event->y() - m_lastMousePos.y();
 
-    if (event->buttons() & Qt::LeftButton) {
-        QVector3D viewDir = m_eye - m_center;
-        QVector3D right = QVector3D::crossProduct(viewDir, m_up).normalized();
+    if (event->buttons() & Qt::LeftButton)
+    {
+        m_yaw -= dx * m_rotationSpeed;
+        m_pitch -= dy * m_rotationSpeed;
 
-        QMatrix4x4 rotation;
-        rotation.rotate(m_rotationSpeed * dx, m_up);
-        rotation.rotate(m_rotationSpeed * dy, right);
-
-        viewDir = rotation * viewDir;
-        m_eye = m_center + viewDir;
-
-        // 새 Up 벡터 계산: 카메라 회전에 따라 동적으로 보정
-        m_up = rotation * m_up;
-        m_up.normalize();
-
-        // View direction이 너무 작아지는 것 방지
-        if (viewDir.lengthSquared() < 1e-8f)
-            return;
-
-        m_viewMatrix.setToIdentity();
-        m_viewMatrix.lookAt(m_eye, m_center, m_up);
-        update();
+        m_yaw = std::clamp(m_yaw, -89.0f, 89.0f);
+        m_pitch = std::clamp(m_pitch, -89.0f, 89.0f);
+        
+        updateViewMatrix();
     }
 
     m_lastMousePos = event->pos();
@@ -129,9 +134,6 @@ void PointCloudViewer::mouseMoveEvent(QMouseEvent *event)
 void PointCloudViewer::wheelEvent(QWheelEvent *event)
 {
     m_zoom *= std::pow(1.001f, event->angleDelta().y());
-    QVector3D viewDir = (m_eye - m_center).normalized();
-    m_eye = m_center + viewDir * (3.0f / m_zoom); // 3.0f은 초기 거리
-    m_viewMatrix.setToIdentity();
-    m_viewMatrix.lookAt(m_eye, m_center, m_up);
-    update();
+    m_radius = 3.0f / m_zoom;
+    updateViewMatrix();
 }
