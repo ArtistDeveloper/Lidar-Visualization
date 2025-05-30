@@ -100,37 +100,23 @@ void PointCloudViewer::mouseMoveEvent(QMouseEvent *event)
     int dy = event->y() - m_lastMousePos.y();
 
     if (event->buttons() & Qt::LeftButton) {
-        QVector3D prevEye = m_eye; // 백업
+        QVector3D viewDir = m_eye - m_center;
+        QVector3D right = QVector3D::crossProduct(viewDir, m_up).normalized();
 
         QMatrix4x4 rotation;
         rotation.rotate(m_rotationSpeed * dx, m_up);
-        QVector3D viewDir = m_eye - m_center;
-        QVector3D right = QVector3D::crossProduct(viewDir, m_up).normalized();
         rotation.rotate(m_rotationSpeed * dy, right);
 
         viewDir = rotation * viewDir;
-
-        // 길이가 너무 작으면 렌더링이 불안정해짐
-        if (viewDir.lengthSquared() < 1e-8f) {
-            return;
-        }
-
         m_eye = m_center + viewDir;
 
-        // lookAt에 사용할 뷰 벡터 보정 (길이 너무 작으면 강제 증가)
-        QVector3D correctedView = m_eye - m_center;
-        float distance = correctedView.length();
-        if (distance < 0.01f) {
-            m_eye = m_center + correctedView.normalized() * 0.01f;
-        }
+        // 새 Up 벡터 계산: 카메라 회전에 따라 동적으로 보정
+        m_up = rotation * m_up;
+        m_up.normalize();
 
-        // Up 벡터가 너무 평행하면 회전 적용 안 함
-        QVector3D newViewDir = (m_center - m_eye).normalized();
-        float dot = QVector3D::dotProduct(newViewDir, m_up.normalized());
-        if (std::abs(dot) > 0.99f) {
-            m_eye = prevEye;  // 복원
+        // View direction이 너무 작아지는 것 방지
+        if (viewDir.lengthSquared() < 1e-8f)
             return;
-        }
 
         m_viewMatrix.setToIdentity();
         m_viewMatrix.lookAt(m_eye, m_center, m_up);
@@ -139,39 +125,6 @@ void PointCloudViewer::mouseMoveEvent(QMouseEvent *event)
 
     m_lastMousePos = event->pos();
 }
-
-
-// void PointCloudViewer::mouseMoveEvent(QMouseEvent *event)
-// {
-//     int dx = event->x() - m_lastMousePos.x();
-//     int dy = event->y() - m_lastMousePos.y();
-
-//     if (event->buttons() & Qt::LeftButton) {
-//         QMatrix4x4 rotation;
-//         rotation.rotate(m_rotationSpeed * dx, m_up);
-//         QVector3D viewDir = m_eye - m_center;
-//         QVector3D right = QVector3D::crossProduct(viewDir, m_up).normalized();
-//         rotation.rotate(m_rotationSpeed * dy, right);
-
-//         viewDir = rotation * viewDir;
-//         m_eye = m_center + viewDir;
-
-//         // 새 up 벡터가 너무 기울어졌는지 점검
-//         QVector3D newViewDir = (m_center - m_eye).normalized();
-//         float dot = QVector3D::dotProduct(newViewDir, m_up.normalized());
-
-//         if (std::abs(dot) > 0.99f) {
-//             // 카메라가 거의 수직으로 기울어졌다면 회전 적용을 막음
-//             return;
-//         }
-
-//         m_viewMatrix.setToIdentity();
-//         m_viewMatrix.lookAt(m_eye, m_center, m_up);
-//         update();
-//     }
-
-//     m_lastMousePos = event->pos();
-// }
 
 void PointCloudViewer::wheelEvent(QWheelEvent *event)
 {
