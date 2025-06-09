@@ -34,12 +34,17 @@ private:
     std::unique_ptr<QOpenGLShaderProgram> m_program = nullptr;
     GLuint m_vao = 0;
     GLuint m_vbo = 0;
-
-    std::vector<PointXYZI> m_pointCloud;
-
-    // Arcball Camera
     QMatrix4x4 m_projMatrix;
     QPoint m_lastMousePos;
 
-    std::unique_ptr<OrbitCamera> camera_; 
+    std::vector<PointXYZI> m_pointCloud;
+    std::unique_ptr<OrbitCamera> camera_;
+
+    /* 새 항목 ― Grid --------------------------------- */
+    void initGrid();
+    GLuint gridVao_{0};
+    GLuint gridVbo_{0};
+    int gridVertexCount_{0};
+    std::unique_ptr<QOpenGLShaderProgram> gridProgram_;
+    bool drawGrid_{true}; // 토글용 플래그 (나중에 UI에서 변경하면 됨)
 };
