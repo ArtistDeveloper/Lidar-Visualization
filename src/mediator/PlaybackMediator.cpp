@@ -23,7 +23,7 @@ PlaybackMediator::PlaybackMediator(LoadFolderButton *openBtn,
     : QObject(parent),
       openBtn_(openBtn), controls_(controls), viewer_(viewer),
       player_(std::make_unique<PointCloudPlayer>()),
-      loaderCtl_(std::make_unique<LoadFolderController>(this)) // ?
+      loaderCtl_(std::make_unique<LoadFolderController>(this))
 {
     // Folder 선택 → Loader
     connect(openBtn_, &LoadFolderButton::folderSelected, loaderCtl_.get(), &LoadFolderController::load);
