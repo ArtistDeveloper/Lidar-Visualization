@@ -5,9 +5,11 @@
 
 #include "PointTypes.h"
 #include "ShaderProgram.h"
+#include "OrbitCamera.h"
 
 PointCloudViewer::PointCloudViewer(QWidget *parent)
-    : QOpenGLWidget(parent)
+    : QOpenGLWidget(parent),
+      camera_(std::make_unique<OrbitCamera>())
 {
 }
 
@@ -22,7 +24,6 @@ PointCloudViewer::~PointCloudViewer()
 
 void PointCloudViewer::initializeGL()
 {
-    m_viewMatrix.lookAt(m_eye, m_center, m_up);
     // setFocusPolicy(Qt::StrongFocus); // 키보드 및 마우스 포커스를 받도록 설정
     // setMouseTracking(true);          // 마우스 무브 추적 (마우스 클릭 없이도 움직임 감지 가능)
     initializeOpenGLFunctions();
@@ -66,7 +67,7 @@ void PointCloudViewer::paintGL()
     m_program->bind();
 
     // MVP 행렬 계산 및 전송
-    QMatrix4x4 mvp = m_projMatrix * m_viewMatrix;
+    QMatrix4x4 mvp = m_projMatrix * camera_->getViewMatrix();
     m_program->setUniformValue("u_mvp", mvp);
 
     glBindVertexArray(m_vao);
@@ -89,51 +90,23 @@ void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &points)
     update();
 }
 
-void PointCloudViewer::mousePressEvent(QMouseEvent *event)
+void PointCloudViewer::mousePressEvent(QMouseEvent *e)
 {
-    m_lastMousePos = event->pos();
+    m_lastMousePos = e->pos();
 }
 
-void PointCloudViewer::updateViewMatrix()
+void PointCloudViewer::mouseMoveEvent(QMouseEvent* e)
 {
-    float yawRad = qDegreesToRadians(m_yaw);
-    float pitchRad = qDegreesToRadians(m_pitch);
-
-    QVector3D offset;
-    offset.setX(m_radius * std::cos(pitchRad) * std::sin(yawRad));
-    offset.setY(m_radius * std::sin(pitchRad));
-    offset.setZ(m_radius * std::cos(pitchRad) * std::cos(yawRad));
-
-    m_eye = m_center + offset;
-    m_up = {0, 1, 0};
-
-    m_viewMatrix.setToIdentity();
-    m_viewMatrix.lookAt(m_eye, m_center, m_up);
-    update();
-}
-
-void PointCloudViewer::mouseMoveEvent(QMouseEvent *event)
-{
-    int dx = event->x() - m_lastMousePos.x();
-    int dy = event->y() - m_lastMousePos.y();
-
-    if (event->buttons() & Qt::LeftButton)
-    {
-        m_yaw -= dx * m_rotationSpeed;
-        m_pitch -= dy * m_rotationSpeed;
-
-        m_yaw = std::clamp(m_yaw, -89.0f, 89.0f);
-        m_pitch = std::clamp(m_pitch, -89.0f, 89.0f);
-        
-        updateViewMatrix();
+    if (e->buttons() & Qt::LeftButton) {
+        const QPoint delta = e->pos() - m_lastMousePos;
+        camera_->rotate(delta.x(), delta.y());
+        update();                       // 다시 그리기
     }
-
-    m_lastMousePos = event->pos();
+    m_lastMousePos = e->pos();
 }
 
-void PointCloudViewer::wheelEvent(QWheelEvent *event)
+void PointCloudViewer::wheelEvent(QWheelEvent* e)
 {
-    m_zoom *= std::pow(1.001f, event->angleDelta().y());
-    m_radius = 3.0f / m_zoom;
-    updateViewMatrix();
+    camera_->zoom(e->angleDelta().y());
+    update();
 }

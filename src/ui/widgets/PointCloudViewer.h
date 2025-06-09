@@ -6,6 +6,8 @@
 
 #include "PointTypes.h"
 
+class OrbitCamera;
+
 class PointCloudViewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
@@ -36,15 +38,8 @@ private:
     std::vector<PointXYZI> m_pointCloud;
 
     // Arcball Camera
-    QMatrix4x4 m_viewMatrix;
     QMatrix4x4 m_projMatrix;
-    QVector3D m_eye = {0.0f, 0.0f, 3.0f};
-    QVector3D m_center = {0.0f, 0.0f, 0.0f};
-    QVector3D m_up = {0.0f, 1.0f, 0.0f};
     QPoint m_lastMousePos;
-    float m_yaw = 0.0f;
-    float m_pitch = 0.0f;
-    float m_radius = 3.0f;
-    float m_rotationSpeed = 0.5f;
-    float m_zoom = 1.0f;
+
+    std::unique_ptr<OrbitCamera> camera_; 
 };
