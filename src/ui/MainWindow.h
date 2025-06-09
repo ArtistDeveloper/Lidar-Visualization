@@ -4,11 +4,13 @@
 #include <QPushButton>
 #include <QProgressBar>
 
-#include "LoadFolderButton.h"
-#include "PointCloudViewer.h"
-#include "PointCloudPlayer.h"
-#include "PointCloudPlayerWidget.h"
-#include "PlaybackMediator.h"
+#include "PointTypes.h"
+
+class LoadFolderButton;
+class PointCloudViewer;
+class PointCloudPlayer;
+class PointCloudPlayerWidget;
+class PlaybackMediator;
 
 class MainWindow : public QMainWindow
 {

@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QWidget>
+#include <QSurfaceFormat>
 
 #include "PointTypes.h"
 #include "MainWindow.h"

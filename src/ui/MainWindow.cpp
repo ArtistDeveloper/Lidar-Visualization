@@ -1,12 +1,11 @@
 #include "MainWindow.h"
 
 #include <QVBoxLayout>
-#include <QFileDialog>
-#include <QCoreApplication>
 
-#include "PointTypes.h"
-#include "ProgressDialog.h"
-#include "KittiBinDirectoryLoader.h"
+#include "PlaybackMediator.h"
+#include "PointCloudViewer.h"
+#include "LoadFolderButton.h"
+#include "PointCloudPlayerWidget.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
