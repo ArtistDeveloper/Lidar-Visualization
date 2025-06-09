@@ -4,6 +4,7 @@ add_subdirectory(core)
 add_subdirectory(graphics)
 add_subdirectory(io)
 add_subdirectory(mediator)
+add_subdirectory(controller)
 
 # add_executable에 대한 QT의 래퍼.
 # 자동으로 정적 QT Build의 QT 플러그인을 링킹,

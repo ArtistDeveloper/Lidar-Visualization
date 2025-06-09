@@ -1,6 +1,6 @@
 /*
 Player와 Widget 간의 양방향 이벤트를 중재하는 허브용도로 사용
-*/ 
+*/
 
 #include "PlaybackMediator.h"
 
@@ -14,6 +14,7 @@ Player와 Widget 간의 양방향 이벤트를 중재하는 허브용도로 사�
 #include "PointCloudPlayer.h"
 #include "ProgressDialog.h"
 #include "KittiBinDirectoryLoader.h"
+#include "LoadFolderController.h"
 
 PlaybackMediator::PlaybackMediator(LoadFolderButton *openBtn,
                                    PointCloudPlayerWidget *controls,
@@ -21,30 +22,29 @@ PlaybackMediator::PlaybackMediator(LoadFolderButton *openBtn,
                                    QObject *parent)
     : QObject(parent),
       openBtn_(openBtn), controls_(controls), viewer_(viewer),
-      player_(std::make_unique<PointCloudPlayer>())
+      player_(std::make_unique<PointCloudPlayer>()),
+      loaderCtl_(std::make_unique<LoadFolderController>(this)) // ?
 {
-    // 1. UI가 Mediator에게 변화를 알려주는 이벤트를 연결한다
-    connect(openBtn_, &QPushButton::clicked, this, &PlaybackMediator::onOpenFolderClicked);
+    // Folder 선택 → Loader
+    connect(openBtn_, &LoadFolderButton::folderSelected, loaderCtl_.get(), &LoadFolderController::load);
+        
+    // Loader 완료 → Mediator
+    connect(loaderCtl_.get(), &LoadFolderController::finished, this, &PlaybackMediator::onDataLoaded);
+
+    // UI가 Mediator에게 변화를 알려주는 이벤트를 연결한다
     connect(controls_, &PointCloudPlayerWidget::playClicked, this, &PlaybackMediator::onPlay);
     connect(controls_, &PointCloudPlayerWidget::pauseClicked, this, &PlaybackMediator::onPause);
     connect(controls_, &PointCloudPlayerWidget::nextClicked, this, &PlaybackMediator::onNext);
     connect(controls_, &PointCloudPlayerWidget::prevClicked, this, &PlaybackMediator::onPrev);
     connect(controls_, &PointCloudPlayerWidget::sliderMoved, this, &PlaybackMediator::onSliderMoved);
 
-    // 2. Player의 동작을 Mediator에 알리며, Mediator는 실제 동작을 선택
+    // Player의 동작을 Mediator에 알리며, Mediator는 실제 동작을 선택
     connect(player_.get(), &PointCloudPlayer::frameChanged, this, &PlaybackMediator::onFrameChanged);
     connect(player_.get(), &PointCloudPlayer::frameIndexChanged, this, &PlaybackMediator::onFrameIndexChanged);
     connect(player_.get(), &PointCloudPlayer::playbackStopped, this, &PlaybackMediator::onPlaybackStopped);
 }
 
-/* ---------- UI 이벤트 ---------- */
-
-void PlaybackMediator::onOpenFolderClicked()
-{
-    const QString dir = QFileDialog::getExistingDirectory(nullptr, "Select Folder");
-    if (!dir.isEmpty())
-        loadFolder(dir);
-}
+/* ---------- UI 이벤트 (controls) ---------- */
 
 void PlaybackMediator::onPlay()
 {
@@ -88,25 +88,12 @@ void PlaybackMediator::onPlaybackStopped()
     controls_->stopPlayback();
 }
 
-/* ---------- 폴더 로드 ---------- */
+/* ---------- 데이터 로드 결과 ---------- */
 
-void PlaybackMediator::loadFolder(const QString &folder)
+void PlaybackMediator::onDataLoaded(const std::vector<std::vector<PointXYZI>> &data)
 {
-    QDir dir(folder);
-    const QStringList bin = dir.entryList(QStringList() << "*.bin", QDir::Files);
-    const int total = bin.size();
-
-    KittiBinDirectoryLoader loader;
-    ProgressDialog dlg;
-    dlg.setRange(0, total);
-    dlg.show();
-    connect(&loader, &KittiBinDirectoryLoader::progressUpdated,
-            &dlg, &ProgressDialog::updateProgress);
-    QCoreApplication::processEvents();
-
-    auto all = loader.loadFromFolder(folder);
-    dlg.close();
-
-    player_->setEntireData(all);
-    controls_->setMaximum(static_cast<int>(all.size()) - 1);
+    if (data.empty())
+        return;
+    player_->setEntireData(data);
+    controls_->setMaximum(static_cast<int>(data.size()) - 1);
 }

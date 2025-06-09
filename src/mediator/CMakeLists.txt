@@ -9,4 +9,5 @@ target_link_libraries(mediator
     ui
     core
     io
+    controller
 )
