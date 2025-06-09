@@ -1,3 +1,7 @@
+/*
+Player와 Widget 간의 양방향 이벤트를 중재하는 허브용도로 사용
+*/ 
+
 #include "PlaybackMediator.h"
 
 #include <QFileDialog>
