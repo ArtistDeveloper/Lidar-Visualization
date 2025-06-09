@@ -11,30 +11,26 @@
 #include "ProgressDialog.h"
 #include "KittiBinDirectoryLoader.h"
 
-
-PlaybackMediator::PlaybackMediator(LoadFolderButton* openBtn,
-                                   PointCloudPlayerWidget* controls,
-                                   PointCloudViewer* viewer,
-                                   QObject* parent)
+PlaybackMediator::PlaybackMediator(LoadFolderButton *openBtn,
+                                   PointCloudPlayerWidget *controls,
+                                   PointCloudViewer *viewer,
+                                   QObject *parent)
     : QObject(parent),
       openBtn_(openBtn), controls_(controls), viewer_(viewer),
       player_(std::make_unique<PointCloudPlayer>())
 {
-    /* 1) UI → Mediator */
-    connect(openBtn_,    &QPushButton::clicked, this, &PlaybackMediator::onOpenFolderClicked);
-    connect(controls_,   &PointCloudPlayerWidget::playClicked,  this, &PlaybackMediator::onPlay);
-    connect(controls_,   &PointCloudPlayerWidget::pauseClicked, this, &PlaybackMediator::onPause);
-    connect(controls_,   &PointCloudPlayerWidget::nextClicked,  this, &PlaybackMediator::onNext);
-    connect(controls_,   &PointCloudPlayerWidget::prevClicked,  this, &PlaybackMediator::onPrev);
-    connect(controls_,   &PointCloudPlayerWidget::sliderMoved,  this, &PlaybackMediator::onSliderMoved);
+    // 1. UI가 Mediator에게 변화를 알려주는 이벤트를 연결한다
+    connect(openBtn_, &QPushButton::clicked, this, &PlaybackMediator::onOpenFolderClicked);
+    connect(controls_, &PointCloudPlayerWidget::playClicked, this, &PlaybackMediator::onPlay);
+    connect(controls_, &PointCloudPlayerWidget::pauseClicked, this, &PlaybackMediator::onPause);
+    connect(controls_, &PointCloudPlayerWidget::nextClicked, this, &PlaybackMediator::onNext);
+    connect(controls_, &PointCloudPlayerWidget::prevClicked, this, &PlaybackMediator::onPrev);
+    connect(controls_, &PointCloudPlayerWidget::sliderMoved, this, &PlaybackMediator::onSliderMoved);
 
-    /* 2) Player → Mediator */
-    connect(player_.get(), &PointCloudPlayer::frameChanged,
-            this, &PlaybackMediator::onFrameChanged);
-    connect(player_.get(), &PointCloudPlayer::frameIndexChanged,
-            this, &PlaybackMediator::onFrameIndexChanged);
-    connect(player_.get(), &PointCloudPlayer::playbackStopped,
-            this, &PlaybackMediator::onPlaybackStopped);
+    // 2. Player의 동작을 Mediator에 알리며, Mediator는 실제 동작을 선택
+    connect(player_.get(), &PointCloudPlayer::frameChanged, this, &PlaybackMediator::onFrameChanged);
+    connect(player_.get(), &PointCloudPlayer::frameIndexChanged, this, &PlaybackMediator::onFrameIndexChanged);
+    connect(player_.get(), &PointCloudPlayer::playbackStopped, this, &PlaybackMediator::onPlaybackStopped);
 }
 
 /* ---------- UI 이벤트 ---------- */
@@ -42,18 +38,38 @@ PlaybackMediator::PlaybackMediator(LoadFolderButton* openBtn,
 void PlaybackMediator::onOpenFolderClicked()
 {
     const QString dir = QFileDialog::getExistingDirectory(nullptr, "Select Folder");
-    if (!dir.isEmpty()) loadFolder(dir);
+    if (!dir.isEmpty())
+        loadFolder(dir);
 }
 
-void PlaybackMediator::onPlay()           { player_->play();        }
-void PlaybackMediator::onPause()          { player_->pause();       }
-void PlaybackMediator::onNext()           { player_->nextFrame();   }
-void PlaybackMediator::onPrev()           { player_->prevFrame();   }
-void PlaybackMediator::onSliderMoved(int i){ player_->setFrame(i); }
+void PlaybackMediator::onPlay()
+{
+    player_->play();
+}
+
+void PlaybackMediator::onPause()
+{
+    player_->pause();
+}
+
+void PlaybackMediator::onNext()
+{
+    player_->nextFrame();
+}
+
+void PlaybackMediator::onPrev()
+{
+    player_->prevFrame();
+}
+
+void PlaybackMediator::onSliderMoved(int i)
+{
+    player_->setFrame(i);
+}
 
 /* ---------- Player 알림 → UI ---------- */
 
-void PlaybackMediator::onFrameChanged(const std::vector<PointXYZI>& pts)
+void PlaybackMediator::onFrameChanged(const std::vector<PointXYZI> &pts)
 {
     viewer_->setPointCloudData(pts);
 }
@@ -70,7 +86,7 @@ void PlaybackMediator::onPlaybackStopped()
 
 /* ---------- 폴더 로드 ---------- */
 
-void PlaybackMediator::loadFolder(const QString& folder)
+void PlaybackMediator::loadFolder(const QString &folder)
 {
     QDir dir(folder);
     const QStringList bin = dir.entryList(QStringList() << "*.bin", QDir::Files);
@@ -78,9 +94,10 @@ void PlaybackMediator::loadFolder(const QString& folder)
 
     KittiBinDirectoryLoader loader;
     ProgressDialog dlg;
-    dlg.setRange(0, total);  dlg.show();
+    dlg.setRange(0, total);
+    dlg.show();
     connect(&loader, &KittiBinDirectoryLoader::progressUpdated,
-            &dlg,  &ProgressDialog::updateProgress);
+            &dlg, &ProgressDialog::updateProgress);
     QCoreApplication::processEvents();
 
     auto all = loader.loadFromFolder(folder);

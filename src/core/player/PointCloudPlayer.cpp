@@ -76,19 +76,9 @@ void PointCloudPlayer::onTimeout()
 {
     if (currentFrame_ >= static_cast<int>(data_.size()) - 1) {
         timer_.stop();
-        emit playbackStopped();  // [NEW] 자동 중지 시 UI 알림
+        emit playbackStopped();  // 자동 중지 시 UI 알림
         return;
     }
 
     nextFrame();
 }
-
-// void PointCloudPlayer::onTimeout()
-// {
-//     if (currentFrame_ >= static_cast<int>(data_.size()) - 1) {
-//         timer_.stop();  // 끝에 도달 시 자동 정지
-//         return;
-//     }
-
-//     nextFrame();
-// }
