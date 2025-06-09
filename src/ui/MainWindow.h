@@ -25,7 +25,6 @@ private:
 
     PointCloudViewer *glWidget_;
     LoadFolderButton *openFolderBtn_;
-    PointCloudPlayer *player_;
     PointCloudPlayerWidget *playerWidget_;
     PlaybackMediator *mediator_;
 
