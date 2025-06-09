@@ -21,6 +21,7 @@ public:
 
 private:
     void setupUI();
+    void setupMediator();
 
     PointCloudViewer *glWidget_;
     LoadFolderButton *openFolderBtn_;

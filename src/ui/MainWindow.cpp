@@ -10,10 +10,7 @@
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
     setupUI();
-    mediator_ = new PlaybackMediator(openFolderBtn_, // NEW
-                                     playerWidget_,
-                                     glWidget_,
-                                     this);
+    setupMediator();
 }
 
 void MainWindow::setupUI()
@@ -37,3 +34,10 @@ void MainWindow::setupUI()
     resize(800, 600);
 }
 
+void MainWindow::setupMediator()
+{
+    mediator_ = new PlaybackMediator(openFolderBtn_, // NEW
+                                     playerWidget_,
+                                     glWidget_,
+                                     this);
+}
