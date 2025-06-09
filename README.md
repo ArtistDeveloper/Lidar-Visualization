@@ -62,5 +62,5 @@ cmake --build build
 <br/>
 
 ## To Do
-- [ ] Add support for camera viewpoint manipulation (rotation, zoom, pan)
+- [x] Add support for camera viewpoint manipulation (rotation, zoom, pan)
 - [ ] Add 2D grid overlay
