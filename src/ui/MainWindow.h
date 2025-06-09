@@ -19,9 +19,6 @@ public:
 
 private:
     void setupUI();
-    void createConnection();
-    void open();
-    void loadFolderData(const QString &folderPath);
 
     PointCloudViewer *glWidget_;
     LoadFolderButton *openFolderBtn_;
@@ -33,5 +30,4 @@ signals:
     void dataLoaded(const std::vector<std::vector<PointXYZI>> &data);
 
 private slots:
-    void onOpenFolderClikced();
 };
