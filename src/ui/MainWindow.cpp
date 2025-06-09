@@ -11,7 +11,10 @@
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
     setupUI();
-    createConnection();
+    mediator_ = new PlaybackMediator(openFolderBtn_, // NEW
+                                     playerWidget_,
+                                     glWidget_,
+                                     this);
 }
 
 void MainWindow::setupUI()
@@ -35,25 +38,9 @@ void MainWindow::setupUI()
     resize(800, 600);
 }
 
-void MainWindow::createConnection()
+void MainWindow::onOpenFolderClikced()
 {
-    player_ = new PointCloudPlayer;
-
-    // 폴더 탐색 버튼 슬롯 연결
-    connect(openFolderBtn_, &QPushButton::clicked, this, &MainWindow::onOpenFolderClikced);
-
-    // PointCloudPlayerWidget의 시그널과 PointCloudPlayer의 슬롯 연결
-    connect(playerWidget_, &PointCloudPlayerWidget::playClicked, player_, &PointCloudPlayer::play);
-    connect(playerWidget_, &PointCloudPlayerWidget::pauseClicked, player_, &PointCloudPlayer::pause);
-    connect(playerWidget_, &PointCloudPlayerWidget::nextClicked, player_, &PointCloudPlayer::nextFrame);
-    connect(playerWidget_, &PointCloudPlayerWidget::prevClicked, player_, &PointCloudPlayer::prevFrame);
-    connect(playerWidget_, &PointCloudPlayerWidget::sliderMoved, player_, &PointCloudPlayer::setFrame);
-
-    // PointCloudPlayer와 glWidget의 연결
-    connect(playerWidget_, &PointCloudPlayerWidget::sliderMoved, player_, &PointCloudPlayer::setFrame);
-    connect(player_, &PointCloudPlayer::frameChanged, glWidget_, &PointCloudViewer::setPointCloudData);
-    connect(player_, &PointCloudPlayer::frameIndexChanged, playerWidget_, &PointCloudPlayerWidget::updateSlider);
-    connect(player_, &PointCloudPlayer::playbackStopped, playerWidget_, &PointCloudPlayerWidget::stopPlayback);
+    open();
 }
 
 void MainWindow::open()
@@ -65,6 +52,8 @@ void MainWindow::open()
 
     loadFolderData(folderPath);
 }
+
+
 
 void MainWindow::loadFolderData(const QString &folderPath)
 {
@@ -90,7 +79,3 @@ void MainWindow::loadFolderData(const QString &folderPath)
     playerWidget_->setMaximum(points.size() - 1);
 }
 
-void MainWindow::onOpenFolderClikced()
-{
-    open();
-}
