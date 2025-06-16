@@ -13,6 +13,7 @@ public:
 
 public slots:
     void load(const QString& folder);
+    void loadFieldData(const QString& filePath);
 
 signals:
     void finished(const std::vector<std::vector<PointXYZI>>& data);

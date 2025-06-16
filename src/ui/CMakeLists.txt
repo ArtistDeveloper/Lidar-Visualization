@@ -15,3 +15,6 @@ target_link_libraries(ui
     PUBLIC Qt6::Widgets Qt6::OpenGL Qt6::OpenGLWidgets mediator
     PRIVATE core graphics
 )
+
+qt6_add_resources(ui_resources resources.qrc)
+target_sources(ui PRIVATE ${ui_resources})

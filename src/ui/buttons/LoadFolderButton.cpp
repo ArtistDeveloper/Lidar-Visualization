@@ -16,3 +16,9 @@ void LoadFolderButton::chooseFolder()
     if (!dir.isEmpty())
         emit folderSelected(dir);
 }
+
+void LoadFolderButton::chooseFieldData() {
+    const QString filePath = QFileDialog::getOpenFileName(nullptr, "Select .bin File", "", "*.bin");
+    if (!filePath.isEmpty())
+        emit fieldFileSelected(filePath);
+}

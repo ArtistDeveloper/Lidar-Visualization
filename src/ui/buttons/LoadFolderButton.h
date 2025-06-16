@@ -11,7 +11,9 @@ public:
 
 signals:
     void folderSelected(const QString &path);
+    void fieldFileSelected(const QString &filePath);
 
-private slots:
-    void chooseFolder();
+public slots:
+    void chooseFolder(); 
+    void chooseFieldData();
 };

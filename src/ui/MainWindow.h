@@ -28,6 +28,8 @@ private:
     PointCloudPlayerWidget *playerWidget_;
     PlaybackMediator *mediator_;
 
+    QPushButton* menuButton_;
+
 signals:
     void dataLoaded(const std::vector<std::vector<PointXYZI>> &data);
 
