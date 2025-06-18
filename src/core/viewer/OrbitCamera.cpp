@@ -5,7 +5,8 @@ OrbitCamera::OrbitCamera() { rebuildView(); }
 
 void OrbitCamera::rotate(float dYawDeg, float dPitchDeg)
 {
-    yaw_ = qBound(-89.f, yaw_ - dYawDeg * speedRot_, 89.f);
+    // yaw_ = qBound(-89.f, yaw_ - dYawDeg * speedRot_, 89.f);
+    yaw_ -= dYawDeg * speedRot_;
     pitch_ = qBound(-89.f, pitch_ - dPitchDeg * speedRot_, 89.f);
     rebuildView();
 }
