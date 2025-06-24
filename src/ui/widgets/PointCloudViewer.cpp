@@ -48,7 +48,8 @@ void PointCloudViewer::initializeGL()
     glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
-    initGrid(); // Grid VAO/VBO 준비
+    // initGrid(); // Grid VAO/VBO 준비
+    buildGrid(1.0f);
 }
 
 void PointCloudViewer::resizeGL(int w, int h)
@@ -60,6 +61,8 @@ void PointCloudViewer::resizeGL(int w, int h)
 
 void PointCloudViewer::paintGL()
 {
+    updateGridIfNeeded();
+
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -138,44 +141,101 @@ void PointCloudViewer::wheelEvent(QWheelEvent *e)
     update();
 }
 
-// Grid용 POC 메서드
-void PointCloudViewer::initGrid()
+void PointCloudViewer::buildGrid(float step)
 {
-    // 1. 셰이더
-    gridProgram_ = ShaderProgram::create(":/shader/grid.vs", ":/shader/grid.fs");
+    /* 이전 버퍼 있으면 정리 */
+    if (gridVbo_)  glDeleteBuffers(1, &gridVbo_);
+    if (gridVao_)  glDeleteVertexArrays(1, &gridVao_);
+    gridVao_ = gridVbo_ = 0;
 
-    // 2. 정점 데이터 생성 (XZ 평면, Y=0)
-    constexpr int GRID_SIZE = 50; // -50 ~ +50
-    constexpr float STEP = 1.0f;
-    std::vector<float> verts;
-    verts.reserve((GRID_SIZE * 2 + 1) * 4 * 3); // 404*3 floats
+    // 셰이더는 한 번만 만들면 되므로 처음 호출 때 초기화
+    if (!gridProgram_)
+        gridProgram_ = ShaderProgram::create(":/shader/grid.vs", ":/shader/grid.fs");
 
-    // x 축 평행선들 (Z 고정)
-    for (int i = -GRID_SIZE; i <= GRID_SIZE; ++i)
-    {
-        float z = i * STEP;
-        verts.insert(verts.end(), {-GRID_SIZE * STEP, 0.f, z,
-                                   GRID_SIZE * STEP, 0.f, z});
-    }
-    // z 축 평행선들 (X 고정)
-    for (int i = -GRID_SIZE; i <= GRID_SIZE; ++i)
-    {
-        float x = i * STEP;
-        verts.insert(verts.end(), {x, 0.f, -GRID_SIZE * STEP,
-                                   x, 0.f, GRID_SIZE * STEP});
-    }
-    gridVertexCount_ = static_cast<int>(verts.size() / 3);
+    constexpr float EXTENT = 200.f;        // -200 m ~ +200 m
+    std::vector<float> v;
+    const int lines = static_cast<int>((EXTENT * 2) / step) + 1;
+    v.reserve(lines * 4 * 3);
 
-    // 3. OpenGL VAO/VBO
+    /* X축과 평행(Z 고정) */
+    for (float z = -EXTENT; z <= EXTENT + 0.001f; z += step)
+        v.insert(v.end(), {-EXTENT, 0.f, z,
+                             EXTENT, 0.f, z});
+    /* Z축과 평행(X 고정) */
+    for (float x = -EXTENT; x <= EXTENT + 0.001f; x += step)
+        v.insert(v.end(), {x, 0.f, -EXTENT,
+                           x, 0.f,  EXTENT});
+
+    gridVertexCount_ = static_cast<int>(v.size() / 3);
+
     glGenVertexArrays(1, &gridVao_);
     glGenBuffers(1, &gridVbo_);
 
     glBindVertexArray(gridVao_);
     glBindBuffer(GL_ARRAY_BUFFER, gridVbo_);
-    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float),
-                 verts.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glBufferData(GL_ARRAY_BUFFER, v.size()*sizeof(float), v.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+// Grid용 POC 메서드
+// void PointCloudViewer::initGrid()
+// {
+//     // 1. 셰이더
+//     gridProgram_ = ShaderProgram::create(":/shader/grid.vs", ":/shader/grid.fs");
+
+//     // 2. 정점 데이터 생성 (XZ 평면, Y=0)
+//     constexpr int GRID_SIZE = 50; // -50 ~ +50
+//     constexpr float STEP = 1.0f;
+//     std::vector<float> verts;
+//     verts.reserve((GRID_SIZE * 2 + 1) * 4 * 3); // 404*3 floats
+
+//     // x 축 평행선들 (Z 고정)
+//     for (int i = -GRID_SIZE; i <= GRID_SIZE; ++i)
+//     {
+//         float z = i * STEP;
+//         verts.insert(verts.end(), {-GRID_SIZE * STEP, 0.f, z,
+//                                    GRID_SIZE * STEP, 0.f, z});
+//     }
+//     // z 축 평행선들 (X 고정)
+//     for (int i = -GRID_SIZE; i <= GRID_SIZE; ++i)
+//     {
+//         float x = i * STEP;
+//         verts.insert(verts.end(), {x, 0.f, -GRID_SIZE * STEP,
+//                                    x, 0.f, GRID_SIZE * STEP});
+//     }
+//     gridVertexCount_ = static_cast<int>(verts.size() / 3);
+
+//     // 3. OpenGL VAO/VBO
+//     glGenVertexArrays(1, &gridVao_);
+//     glGenBuffers(1, &gridVbo_);
+
+//     glBindVertexArray(gridVao_);
+//     glBindBuffer(GL_ARRAY_BUFFER, gridVbo_);
+//     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float),
+//                  verts.data(), GL_STATIC_DRAW);
+//     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+//     glEnableVertexAttribArray(0);
+//     glBindBuffer(GL_ARRAY_BUFFER, 0);
+//     glBindVertexArray(0);
+// }
+
+void PointCloudViewer::updateGridIfNeeded()
+{
+    const float r = camera_->getRadius();          // 카메라 ∥타깃 거리
+
+    float desired;
+    if      (r > 150.f) desired = 10.f;   // ← 값은 마음대로 조정
+    else if (r >  70.f) desired =  5.f;
+    else if (r >  25.f) desired =  2.f;
+    else if (r >   7.f) desired =  1.f;
+    else                desired =  0.5f;
+
+    if (qFuzzyCompare(desired, currentGridStep_)) // 이미 그 간격이면 패스
+        return;
+
+    currentGridStep_ = desired;
+    buildGrid(desired);                             // 새 VBO 생성
 }

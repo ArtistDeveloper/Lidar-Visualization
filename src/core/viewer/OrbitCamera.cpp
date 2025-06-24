@@ -52,7 +52,6 @@ void OrbitCamera::pan(float dxPx, float dyPx, float viewHpx, float fovDeg)
     rebuildView();
 }
 
-
 void OrbitCamera::rebuildView()
 {
     const float yawRad = qDegreesToRadians(yaw_);

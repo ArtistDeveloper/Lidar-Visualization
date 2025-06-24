@@ -47,4 +47,8 @@ private:
     int gridVertexCount_{0};
     std::unique_ptr<QOpenGLShaderProgram> gridProgram_;
     bool drawGrid_{true}; // 토글용 플래그 (나중에 UI에서 변경하면 됨)
+
+    void buildGrid(float step);
+    void updateGridIfNeeded();  // 스텝 변경 감지
+    float currentGridStep_{-1.f}; // 현재 생성된 간격
 };

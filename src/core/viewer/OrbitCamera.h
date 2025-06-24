@@ -12,6 +12,7 @@ public:
     void pan(float dxPx, float dyPx, float viewportHpx, float fovDeg);
 
     const QMatrix4x4 &getViewMatrix() const { return view_; }
+    float getRadius() const { return radius_; }
 
 private:
     void rebuildView();
