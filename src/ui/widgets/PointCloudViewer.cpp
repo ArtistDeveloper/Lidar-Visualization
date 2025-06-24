@@ -89,15 +89,16 @@ void PointCloudViewer::paintGL()
     }
 }
 
-void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI>& src)
+void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &src)
 {
     makeCurrent();
 
     m_pointCloud.resize(src.size());
     std::transform(src.begin(), src.end(), m_pointCloud.begin(),
-                   [](const PointXYZI& p){
+                   [](const PointXYZI &p)
+                   {
                        // (x, y, z) -> (x, z, -y)
-                       return PointXYZI{ p.x, p.z, -p.y, p.intensity };
+                       return PointXYZI{p.x, p.z, -p.y, p.intensity};
                    });
 
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -115,12 +116,18 @@ void PointCloudViewer::mousePressEvent(QMouseEvent *e)
 
 void PointCloudViewer::mouseMoveEvent(QMouseEvent *e)
 {
-    if (e->buttons() & Qt::LeftButton)
+    const QPoint delta = e->pos() - m_lastMousePos;
+
+    if (e->buttons() & Qt::RightButton)
     {
-        const QPoint delta = e->pos() - m_lastMousePos;
         camera_->rotate(delta.x(), delta.y());
-        update(); // 다시 그리기
     }
+    else if (e->buttons() & Qt::LeftButton)
+    {
+        camera_->pan(delta.x(), -delta.y());
+    }
+
+    update();
     m_lastMousePos = e->pos();
 }
 
@@ -137,22 +144,24 @@ void PointCloudViewer::initGrid()
     gridProgram_ = ShaderProgram::create(":/shader/grid.vs", ":/shader/grid.fs");
 
     // 2. 정점 데이터 생성 (XZ 평면, Y=0)
-    constexpr int GRID_SIZE = 50;     // -50 ~ +50
+    constexpr int GRID_SIZE = 50; // -50 ~ +50
     constexpr float STEP = 1.0f;
     std::vector<float> verts;
-    verts.reserve((GRID_SIZE*2+1)*4*3);   // 404*3 floats
+    verts.reserve((GRID_SIZE * 2 + 1) * 4 * 3); // 404*3 floats
 
     // x 축 평행선들 (Z 고정)
-    for (int i=-GRID_SIZE; i<=GRID_SIZE; ++i) {
+    for (int i = -GRID_SIZE; i <= GRID_SIZE; ++i)
+    {
         float z = i * STEP;
-        verts.insert(verts.end(), { -GRID_SIZE*STEP, 0.f, z,
-                                     GRID_SIZE*STEP, 0.f, z });
+        verts.insert(verts.end(), {-GRID_SIZE * STEP, 0.f, z,
+                                   GRID_SIZE * STEP, 0.f, z});
     }
     // z 축 평행선들 (X 고정)
-    for (int i=-GRID_SIZE; i<=GRID_SIZE; ++i) {
+    for (int i = -GRID_SIZE; i <= GRID_SIZE; ++i)
+    {
         float x = i * STEP;
-        verts.insert(verts.end(), { x, 0.f, -GRID_SIZE*STEP,
-                                    x, 0.f,  GRID_SIZE*STEP });
+        verts.insert(verts.end(), {x, 0.f, -GRID_SIZE * STEP,
+                                   x, 0.f, GRID_SIZE * STEP});
     }
     gridVertexCount_ = static_cast<int>(verts.size() / 3);
 
@@ -162,9 +171,9 @@ void PointCloudViewer::initGrid()
 
     glBindVertexArray(gridVao_);
     glBindBuffer(GL_ARRAY_BUFFER, gridVbo_);
-    glBufferData(GL_ARRAY_BUFFER, verts.size()*sizeof(float),
+    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float),
                  verts.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

@@ -18,6 +18,22 @@ void OrbitCamera::zoom(float wheelDelta)
     rebuildView();
 }
 
+void OrbitCamera::pan(float dxPixels, float dyPixels)
+{
+    // 화면-기준 픽셀 이동을 눈 벡터·업 벡터로 변환
+    const float yawRad   = qDegreesToRadians(yaw_);
+    const float pitchRad = qDegreesToRadians(pitch_);
+
+    // 카메라 오른쪽 / 위 방향
+    const QVector3D right{  std::cos(yawRad), 0, -std::sin(yawRad) };
+    const QVector3D up   { 0, 1, 0 };
+
+    center_ -= right * dxPixels * speedPan_ * radius_;
+    center_ += up    * dyPixels * speedPan_ * radius_;
+
+    rebuildView();
+}
+
 void OrbitCamera::rebuildView()
 {
     const float yawRad = qDegreesToRadians(yaw_);
