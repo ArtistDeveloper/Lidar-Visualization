@@ -5,34 +5,53 @@ OrbitCamera::OrbitCamera() { rebuildView(); }
 
 void OrbitCamera::rotate(float dYawDeg, float dPitchDeg)
 {
-    // yaw_ = qBound(-89.f, yaw_ - dYawDeg * speedRot_, 89.f);
-    yaw_ -= dYawDeg * speedRot_;
+    yaw_ = std::fmod(yaw_ - dYawDeg * speedRot_, 360.f);
+    if (yaw_ < 0.f)
+        yaw_ += 360.f;
+
     pitch_ = qBound(-89.f, pitch_ - dPitchDeg * speedRot_, 89.f);
     rebuildView();
 }
 
-void OrbitCamera::zoom(float wheelDelta)
+void OrbitCamera::zoom(int wheelDelta)
 {
-    radius_ *= std::pow(speedZoom_, -wheelDelta); // 휠 ↑: 확대
-    radius_ = qMax(0.1f, radius_);
+    constexpr float kQtStep = 120.0f;
+    float steps = wheelDelta / kQtStep;
+
+    float factor = std::pow(zoomStep_, -steps);
+
+    radius_ = qBound(minRadius_, radius_ * factor, maxRadius_);
     rebuildView();
 }
 
-void OrbitCamera::pan(float dxPixels, float dyPixels)
+void OrbitCamera::pan(float dxPx, float dyPx, float viewHpx, float fovDeg)
 {
-    // 화면-기준 픽셀 이동을 눈 벡터·업 벡터로 변환
+    const float k = 2.f * radius_
+                  * std::tan(qDegreesToRadians(fovDeg * 0.5f))
+                  / viewHpx;
+
+    // 현재 카메라 축 구하기
     const float yawRad   = qDegreesToRadians(yaw_);
     const float pitchRad = qDegreesToRadians(pitch_);
 
-    // 카메라 오른쪽 / 위 방향
-    const QVector3D right{  std::cos(yawRad), 0, -std::sin(yawRad) };
-    const QVector3D up   { 0, 1, 0 };
+    // camera 방향
+    QVector3D forward{
+        -std::cos(pitchRad) * std::sin(yawRad),
+        -std::sin(pitchRad),
+        -std::cos(pitchRad) * std::cos(yawRad)
+    };
+    forward.normalize();
 
-    center_ -= right * dxPixels * speedPan_ * radius_;
-    center_ += up    * dyPixels * speedPan_ * radius_;
+    QVector3D worldUp{0,1,0};
+    QVector3D right = QVector3D::crossProduct(forward, worldUp).normalized();
+    QVector3D up    = QVector3D::crossProduct(right,   forward);   // 이미 정규화됨
+
+    center_ -= right * dxPx * k;
+    center_ += up    * dyPx * k;
 
     rebuildView();
 }
+
 
 void OrbitCamera::rebuildView()
 {

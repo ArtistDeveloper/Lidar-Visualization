@@ -55,8 +55,7 @@ void PointCloudViewer::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
     m_projMatrix.setToIdentity();
-    m_projMatrix.perspective(45.0f, float(w) / float(h), 0.1f, 100.0f);
-    // m_projMatrix.perspective(45.0f, float(w) / float(h), 0.01f, 500.0f);
+    m_projMatrix.perspective(45.0f, float(w) / float(h), 0.1f, 600.0f);
 }
 
 void PointCloudViewer::paintGL()
@@ -124,7 +123,9 @@ void PointCloudViewer::mouseMoveEvent(QMouseEvent *e)
     }
     else if (e->buttons() & Qt::LeftButton)
     {
-        camera_->pan(delta.x(), -delta.y());
+        camera_->pan(delta.x(), -delta.y(),
+                     height(),
+                     45.0f);
     }
 
     update();
