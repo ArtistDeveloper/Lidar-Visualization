@@ -95,13 +95,17 @@ void PointCloudViewer::paintGL()
 void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &src)
 {
     makeCurrent();
+    constexpr float KITTI_SENSOR_HEIGHT = 1.73f;
 
     pointCloud_.resize(src.size());
     std::transform(src.begin(), src.end(), pointCloud_.begin(),
                    [](const PointXYZI &p)
                    {
-                       // (x, y, z) -> (x, z, -y)
-                       return PointXYZI{p.x, p.z, -p.y, p.intensity};
+                       return PointXYZI{
+                           p.x,
+                           p.z + KITTI_SENSOR_HEIGHT,
+                           -p.y,
+                           p.intensity};
                    });
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo_);
