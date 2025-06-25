@@ -17,10 +17,10 @@ public:
 private:
     void rebuildView();
 
-    float yaw_{0.f};              // deg
-    float pitch_{0.f};            // deg
-    float radius_{3.f};           // distance
-    const float speedRot_ = 0.3f; // 마우스 감도
+    float yaw_{0.f}; // 0~360도 범위로 스케일링해서 사용. center_주위로 얼마나 회전한지 각도 저장
+    float pitch_{0.f};
+    float radius_{3.f}; // distance           
+    const float speedRot_ = 0.3f;
     const float speedZoom_ = 1.001f;
     const float speedPan_ = 0.001f;
     

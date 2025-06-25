@@ -31,13 +31,13 @@ protected:
 private:
     void updateViewMatrix();
 
-    std::unique_ptr<QOpenGLShaderProgram> m_program = nullptr;
-    GLuint m_vao = 0;
-    GLuint m_vbo = 0;
-    QMatrix4x4 m_projMatrix;
-    QPoint m_lastMousePos;
+    std::unique_ptr<QOpenGLShaderProgram> program_ = nullptr;
+    GLuint vao_ = 0;
+    GLuint vbo_ = 0;
+    QMatrix4x4 projMatrix_;
+    QPoint lastMousePos_;
 
-    std::vector<PointXYZI> m_pointCloud;
+    std::vector<PointXYZI> pointCloud_;
     std::unique_ptr<OrbitCamera> camera_;
 
     /* 새 항목 ― Grid --------------------------------- */

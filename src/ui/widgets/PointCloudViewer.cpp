@@ -16,9 +16,9 @@ PointCloudViewer::PointCloudViewer(QWidget *parent)
 PointCloudViewer::~PointCloudViewer()
 {
     makeCurrent();
-    glDeleteVertexArrays(1, &m_vao);
-    glDeleteBuffers(1, &m_vbo);
-    m_program.reset();
+    glDeleteVertexArrays(1, &vao_);
+    glDeleteBuffers(1, &vbo_);
+    program_.reset();
     doneCurrent();
 }
 
@@ -29,14 +29,14 @@ void PointCloudViewer::initializeGL()
     initializeOpenGLFunctions();
 
     // 셰이더 프로그램 생성
-    m_program = ShaderProgram::create(":/shader/pointcloud.vs", ":/shader/pointcloud.fs");
+    program_ = ShaderProgram::create(":/shader/pointcloud.vs", ":/shader/pointcloud.fs");
 
     // OpenGL Buffer
-    glGenVertexArrays(1, &m_vao);
-    glGenBuffers(1, &m_vbo);
+    glGenVertexArrays(1, &vao_);
+    glGenBuffers(1, &vbo_);
 
-    glBindVertexArray(m_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
     // 초기에는 빈 버퍼를 할당
     glBufferData(GL_ARRAY_BUFFER, 1, nullptr, GL_DYNAMIC_DRAW);
 
@@ -55,8 +55,8 @@ void PointCloudViewer::initializeGL()
 void PointCloudViewer::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
-    m_projMatrix.setToIdentity();
-    m_projMatrix.perspective(45.0f, float(w) / float(h), 0.1f, 600.0f);
+    projMatrix_.setToIdentity();
+    projMatrix_.perspective(45.0f, float(w) / float(h), 0.1f, 600.0f);
 }
 
 void PointCloudViewer::paintGL()
@@ -66,23 +66,23 @@ void PointCloudViewer::paintGL()
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_program->bind();
+    program_->bind();
 
     // MVP 행렬 계산 및 전송
-    QMatrix4x4 mvp = m_projMatrix * camera_->getViewMatrix();
-    m_program->setUniformValue("u_mvp", mvp);
+    QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
+    program_->setUniformValue("u_mvp", mvp);
 
-    glBindVertexArray(m_vao);
-    glDrawArrays(GL_POINTS, 0, m_pointCloud.size());
+    glBindVertexArray(vao_);
+    glDrawArrays(GL_POINTS, 0, pointCloud_.size());
     glBindVertexArray(0);
 
-    m_program->release();
+    program_->release();
 
     /* --- Grid --- */
     if (drawGrid_)
     {
         gridProgram_->bind();
-        QMatrix4x4 mvp = m_projMatrix * camera_->getViewMatrix();
+        QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
         gridProgram_->setUniformValue("u_mvp", mvp);
         glBindVertexArray(gridVao_);
         glDrawArrays(GL_LINES, 0, gridVertexCount_);
@@ -95,30 +95,30 @@ void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &src)
 {
     makeCurrent();
 
-    m_pointCloud.resize(src.size());
-    std::transform(src.begin(), src.end(), m_pointCloud.begin(),
+    pointCloud_.resize(src.size());
+    std::transform(src.begin(), src.end(), pointCloud_.begin(),
                    [](const PointXYZI &p)
                    {
                        // (x, y, z) -> (x, z, -y)
                        return PointXYZI{p.x, p.z, -p.y, p.intensity};
                    });
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
     glBufferData(GL_ARRAY_BUFFER,
-                 m_pointCloud.size() * sizeof(PointXYZI),
-                 m_pointCloud.data(), GL_DYNAMIC_DRAW);
+                 pointCloud_.size() * sizeof(PointXYZI),
+                 pointCloud_.data(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     update();
 }
 
 void PointCloudViewer::mousePressEvent(QMouseEvent *e)
 {
-    m_lastMousePos = e->pos();
+    lastMousePos_ = e->pos();
 }
 
 void PointCloudViewer::mouseMoveEvent(QMouseEvent *e)
 {
-    const QPoint delta = e->pos() - m_lastMousePos;
+    const QPoint delta = e->pos() - lastMousePos_;
 
     if (e->buttons() & Qt::RightButton)
     {
@@ -132,7 +132,7 @@ void PointCloudViewer::mouseMoveEvent(QMouseEvent *e)
     }
 
     update();
-    m_lastMousePos = e->pos();
+    lastMousePos_ = e->pos();
 }
 
 void PointCloudViewer::wheelEvent(QWheelEvent *e)
