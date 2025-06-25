@@ -5,9 +5,7 @@ OrbitCamera::OrbitCamera() { rebuildView(); }
 
 void OrbitCamera::rotate(float dYawDeg, float dPitchDeg)
 {
-    // qDebug() << "dYawDeg, pithDeg: " << dYawDeg << " " << dPitchDeg;
     yaw_ = std::fmod(yaw_ - dYawDeg * speedRot_, 360.f);
-    // qDebug() << "yaw: " << yaw_;
     if (yaw_ < 0.f)
         yaw_ += 360.f;
 
@@ -27,6 +25,15 @@ void OrbitCamera::zoom(int wheelDelta)
 
     // 휠 업시 radius 감소하여 줌 인
     radius_ = qBound(minRadius_, radius_ * factor, maxRadius_);
+    rebuildView();
+}
+
+void OrbitCamera::reset()
+{
+    yaw_ = defaultYaw;
+    pitch_ = defaultPitch;
+    radius_ = defaultRadius;
+    center_ = {0, 0, 0};
     rebuildView();
 }
 
@@ -65,8 +72,7 @@ void OrbitCamera::rebuildView()
     QVector3D camera{
         radius_ * std::cos(pitchRad) * std::sin(yawRad),
         radius_ * std::sin(pitchRad),
-        radius_ * std::cos(pitchRad) * std::cos(yawRad)
-    };
+        radius_ * std::cos(pitchRad) * std::cos(yawRad)};
     QVector3D up{0, 1, 0};
 
     // camera + center가 카메라의 최종 위치

@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QMouseEvent>
+#include <QKeyEvent>
 
 #include "PointTypes.h"
 #include "ShaderProgram.h"
@@ -24,7 +25,7 @@ PointCloudViewer::~PointCloudViewer()
 
 void PointCloudViewer::initializeGL()
 {
-    // setFocusPolicy(Qt::StrongFocus); // 키보드 및 마우스 포커스를 받도록 설정
+    setFocusPolicy(Qt::StrongFocus); // 키보드 및 마우스 포커스를 받도록 설정
     // setMouseTracking(true);          // 마우스 무브 추적 (마우스 클릭 없이도 움직임 감지 가능)
     initializeOpenGLFunctions();
 
@@ -141,11 +142,27 @@ void PointCloudViewer::wheelEvent(QWheelEvent *e)
     update();
 }
 
+void PointCloudViewer::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_O && // ‘o’ 또는 ‘O’
+        !(e->modifiers() & (Qt::ControlModifier |
+                            Qt::ShiftModifier |
+                            Qt::AltModifier)))
+    {
+        camera_->reset();
+        update();
+        return;
+    }
+    QOpenGLWidget::keyPressEvent(e);
+}
+
 void PointCloudViewer::buildGrid(float step)
 {
     // 이전 버퍼 존재하면 정리
-    if (gridVbo_)  glDeleteBuffers(1, &gridVbo_);
-    if (gridVao_)  glDeleteVertexArrays(1, &gridVao_);
+    if (gridVbo_)
+        glDeleteBuffers(1, &gridVbo_);
+    if (gridVao_)
+        glDeleteVertexArrays(1, &gridVao_);
     gridVao_ = gridVbo_ = 0;
 
     // 셰이더는 한 번만 만들면 되므로 처음 호출 때 초기화
@@ -160,11 +177,11 @@ void PointCloudViewer::buildGrid(float step)
     // X축과 평행(Z 고정)
     for (float z = -EXTENT; z <= EXTENT + 0.001f; z += step)
         v.insert(v.end(), {-EXTENT, 0.f, z,
-                             EXTENT, 0.f, z});
+                           EXTENT, 0.f, z});
     // Z축과 평행(X 고정)
     for (float x = -EXTENT; x <= EXTENT + 0.001f; x += step)
         v.insert(v.end(), {x, 0.f, -EXTENT,
-                           x, 0.f,  EXTENT});
+                           x, 0.f, EXTENT});
 
     gridVertexCount_ = static_cast<int>(v.size() / 3);
 
@@ -173,8 +190,8 @@ void PointCloudViewer::buildGrid(float step)
 
     glBindVertexArray(gridVao_);
     glBindBuffer(GL_ARRAY_BUFFER, gridVbo_);
-    glBufferData(GL_ARRAY_BUFFER, v.size()*sizeof(float), v.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glBufferData(GL_ARRAY_BUFFER, v.size() * sizeof(float), v.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -185,11 +202,16 @@ void PointCloudViewer::updateGridIfNeeded()
     const float r = camera_->getRadius();
 
     float desired;
-    if      (r > 150.f) desired = 10.f;
-    else if (r >  70.f) desired =  5.f;
-    else if (r >  25.f) desired =  2.f;
-    else if (r >   7.f) desired =  1.f;
-    else                desired =  0.5f;
+    if (r > 150.f)
+        desired = 10.f;
+    else if (r > 70.f)
+        desired = 5.f;
+    else if (r > 25.f)
+        desired = 2.f;
+    else if (r > 7.f)
+        desired = 1.f;
+    else
+        desired = 0.5f;
 
     if (qFuzzyCompare(desired, currentGridStep_)) // 이미 그 간격이면 패스
         return;
