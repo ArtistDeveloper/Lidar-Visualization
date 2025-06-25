@@ -21,7 +21,6 @@ private:
     float pitch_{0.f};
     float radius_{3.f}; // distance           
     const float speedRot_ = 0.3f;
-    const float speedZoom_ = 1.001f;
     const float speedPan_ = 0.001f;
     
     // Zoom 최소 및 최대값 지정

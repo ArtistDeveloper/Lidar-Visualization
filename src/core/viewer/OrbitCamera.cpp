@@ -17,11 +17,15 @@ void OrbitCamera::rotate(float dYawDeg, float dPitchDeg)
 
 void OrbitCamera::zoom(int wheelDelta)
 {
-    constexpr float kQtStep = 120.0f;
-    float steps = wheelDelta / kQtStep;
+    // 8unit = 1deg, 120unit = 15deg
+    constexpr float q_wheel_step = 120.0f;
+    float steps = wheelDelta / q_wheel_step;
 
+    // 휠 업: 1^-1 -> 0.86
+    // 휠 다운: 1^1 -> 1.15
     float factor = std::pow(zoomStep_, -steps);
 
+    // 휠 업시 radius 감소하여 줌 인
     radius_ = qBound(minRadius_, radius_ * factor, maxRadius_);
     rebuildView();
 }
@@ -65,7 +69,7 @@ void OrbitCamera::rebuildView()
     };
     QVector3D up{0, 1, 0};
 
-    // eye + center가 카메라의 최종 위치
+    // camera + center가 카메라의 최종 위치
     view_.setToIdentity();
     view_.lookAt(camera + center_, center_, up);
 }

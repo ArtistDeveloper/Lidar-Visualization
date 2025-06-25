@@ -31,7 +31,7 @@ private slots:
 
 private:
     std::vector<std::vector<PointXYZI>> data_;
-    const int KITTI_FRAME_RATE = 100;
+    const int kitti_frame_rate = 100;
     int currentFrame_ = 0;
     QTimer timer_;
 };

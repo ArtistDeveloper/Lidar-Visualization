@@ -6,7 +6,7 @@ PointCloudPlayer::PointCloudPlayer(QObject *parent) : QObject(parent)
 {
     // connect(&timer_, &QTimer::timeout, this, &PointCloudPlayer::onTimeout);
     connect(&timer_, &QTimer::timeout, this, &PointCloudPlayer::onTimeout);
-    timer_.setInterval(KITTI_FRAME_RATE);  // 0.5초 간격
+    timer_.setInterval(kitti_frame_rate);  // 0.5초 간격
 }
 
 void PointCloudPlayer::setEntireData(const std::vector<std::vector<PointXYZI>> &data)
