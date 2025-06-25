@@ -3,6 +3,7 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
+#include <QPainter>
 
 #include "PointTypes.h"
 
@@ -27,10 +28,11 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
-    void keyPressEvent(QKeyEvent* e) override;
+    void keyPressEvent(QKeyEvent *e) override;
 
 private:
     void updateViewMatrix();
+    void drawAxisLabels(QPainter &p, const QMatrix4x4 &mvp, int viewW, int viewH);
 
     std::unique_ptr<QOpenGLShaderProgram> program_ = nullptr;
     GLuint vao_ = 0;
@@ -50,6 +52,6 @@ private:
     bool drawGrid_{true}; // 토글용 플래그 (나중에 UI에서 변경하면 됨)
 
     void buildGrid(float step);
-    void updateGridIfNeeded();  // 스텝 변경 감지
+    void updateGridIfNeeded();    // 스텝 변경 감지
     float currentGridStep_{-1.f}; // 현재 생성된 간격
 };

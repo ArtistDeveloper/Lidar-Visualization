@@ -90,6 +90,19 @@ void PointCloudViewer::paintGL()
         glBindVertexArray(0);
         gridProgram_->release();
     }
+
+    {
+        // OpenGL ↔ QPainter 혼용 시 깊이 테스트는 끄는 편이 안전
+        glDisable(GL_DEPTH_TEST);
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::TextAntialiasing, true);
+        painter.setPen(Qt::white); // 필요하면 색상 조절
+        drawAxisLabels(painter, mvp, width(), height());
+        painter.end();
+
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &src)
@@ -173,7 +186,7 @@ void PointCloudViewer::buildGrid(float step)
     if (!gridProgram_)
         gridProgram_ = ShaderProgram::create(":/shader/grid.vs", ":/shader/grid.fs");
 
-    constexpr float EXTENT = 200.f; // -200 m ~ +200 m
+    constexpr float EXTENT = 75.f; // -750 m ~ +75 m
     std::vector<float> v;
     const int lines = static_cast<int>((EXTENT * 2) / step) + 1;
     v.reserve(lines * 4 * 3);
@@ -222,4 +235,45 @@ void PointCloudViewer::updateGridIfNeeded()
 
     currentGridStep_ = desired;
     buildGrid(desired); // 새 VBO 생성
+}
+
+void PointCloudViewer::drawAxisLabels(QPainter &p,
+                                      const QMatrix4x4 &mvp,
+                                      int viewW, int viewH)
+{
+    auto project = [&](const QVector3D &world) -> std::optional<QPoint>
+    {
+        QVector4D clip = mvp * QVector4D(world, 1.0f);
+        if (clip.w() <= 0.0f)
+            return std::nullopt;                 // 카메라 뒤
+        QVector3D ndc = clip.toVector3DAffine(); // -1 ~ 1
+        if (ndc.x() < -1.f || ndc.x() > 1.f ||
+            ndc.y() < -1.f || ndc.y() > 1.f)
+            return std::nullopt; // 화면 밖
+        int sx = int((ndc.x() * 0.5f + 0.5f) * viewW);
+        int sy = int((-ndc.y() * 0.5f + 0.5f) * viewH);
+        return QPoint(sx, sy);
+    };
+
+    const float step = currentGridStep_;
+    const int digits = (step < 1.f) ? 1 : 0;
+    constexpr float EXTENT = 75.f; // buildGrid와 동일
+
+    // X축 위 라벨
+    for (float x = -EXTENT; x <= EXTENT + 0.001f; x += step)
+    {
+        if (qFuzzyIsNull(x))
+            continue; // 0은 생략
+        if (auto pt = project({x, 0.f, 0.f}))
+            p.drawText(*pt, QString::number(x, 'f', digits) + "m");
+    }
+
+    // Z축 위 라벨
+    for (float z = -EXTENT; z <= EXTENT + 0.001f; z += step)
+    {
+        if (qFuzzyIsNull(z))
+            continue;
+        if (auto pt = project({0.f, 0.f, z}))
+            p.drawText(*pt, QString::number(z, 'f', digits) + "m");
+    }
 }
