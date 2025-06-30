@@ -3,6 +3,7 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
+#include <QPainter>
 
 #include "PointTypes.h"
 
@@ -27,17 +28,19 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    void keyPressEvent(QKeyEvent *e) override;
 
 private:
     void updateViewMatrix();
+    void drawAxisLabels(QPainter &p, const QMatrix4x4 &mvp, int viewW, int viewH);
 
-    std::unique_ptr<QOpenGLShaderProgram> m_program = nullptr;
-    GLuint m_vao = 0;
-    GLuint m_vbo = 0;
-    QMatrix4x4 m_projMatrix;
-    QPoint m_lastMousePos;
+    std::unique_ptr<QOpenGLShaderProgram> program_ = nullptr;
+    GLuint vao_ = 0;
+    GLuint vbo_ = 0;
+    QMatrix4x4 projMatrix_;
+    QPoint lastMousePos_;
 
-    std::vector<PointXYZI> m_pointCloud;
+    std::vector<PointXYZI> pointCloud_;
     std::unique_ptr<OrbitCamera> camera_;
 
     /* 새 항목 ― Grid --------------------------------- */
@@ -47,4 +50,8 @@ private:
     int gridVertexCount_{0};
     std::unique_ptr<QOpenGLShaderProgram> gridProgram_;
     bool drawGrid_{true}; // 토글용 플래그 (나중에 UI에서 변경하면 됨)
+
+    void buildGrid(float step);
+    void updateGridIfNeeded();    // 스텝 변경 감지
+    float currentGridStep_{-1.f}; // 현재 생성된 간격
 };

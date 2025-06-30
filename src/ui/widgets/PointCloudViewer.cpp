@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QMouseEvent>
+#include <QKeyEvent>
 
 #include "PointTypes.h"
 #include "ShaderProgram.h"
@@ -16,27 +17,27 @@ PointCloudViewer::PointCloudViewer(QWidget *parent)
 PointCloudViewer::~PointCloudViewer()
 {
     makeCurrent();
-    glDeleteVertexArrays(1, &m_vao);
-    glDeleteBuffers(1, &m_vbo);
-    m_program.reset();
+    glDeleteVertexArrays(1, &vao_);
+    glDeleteBuffers(1, &vbo_);
+    program_.reset();
     doneCurrent();
 }
 
 void PointCloudViewer::initializeGL()
 {
-    // setFocusPolicy(Qt::StrongFocus); // 키보드 및 마우스 포커스를 받도록 설정
+    setFocusPolicy(Qt::StrongFocus); // 키보드 및 마우스 포커스를 받도록 설정
     // setMouseTracking(true);          // 마우스 무브 추적 (마우스 클릭 없이도 움직임 감지 가능)
     initializeOpenGLFunctions();
 
     // 셰이더 프로그램 생성
-    m_program = ShaderProgram::create(":/shader/pointcloud.vs", ":/shader/pointcloud.fs");
+    program_ = ShaderProgram::create(":/shader/pointcloud.vs", ":/shader/pointcloud.fs");
 
     // OpenGL Buffer
-    glGenVertexArrays(1, &m_vao);
-    glGenBuffers(1, &m_vbo);
+    glGenVertexArrays(1, &vao_);
+    glGenBuffers(1, &vbo_);
 
-    glBindVertexArray(m_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
     // 초기에는 빈 버퍼를 할당
     glBufferData(GL_ARRAY_BUFFER, 1, nullptr, GL_DYNAMIC_DRAW);
 
@@ -48,80 +49,108 @@ void PointCloudViewer::initializeGL()
     glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
-    initGrid(); // Grid VAO/VBO 준비
+    // initGrid(); // Grid VAO/VBO 준비
+    buildGrid(1.0f);
 }
 
 void PointCloudViewer::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
-    m_projMatrix.setToIdentity();
-    m_projMatrix.perspective(45.0f, float(w) / float(h), 0.1f, 100.0f);
-    // m_projMatrix.perspective(45.0f, float(w) / float(h), 0.01f, 500.0f);
+    projMatrix_.setToIdentity();
+    projMatrix_.perspective(45.0f, float(w) / float(h), 0.1f, 600.0f);
 }
 
 void PointCloudViewer::paintGL()
 {
+    updateGridIfNeeded();
+
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_program->bind();
+    program_->bind();
 
     // MVP 행렬 계산 및 전송
-    QMatrix4x4 mvp = m_projMatrix * camera_->getViewMatrix();
-    m_program->setUniformValue("u_mvp", mvp);
+    QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
+    program_->setUniformValue("u_mvp", mvp);
 
-    glBindVertexArray(m_vao);
-    glDrawArrays(GL_POINTS, 0, m_pointCloud.size());
+    glBindVertexArray(vao_);
+    glDrawArrays(GL_POINTS, 0, pointCloud_.size());
     glBindVertexArray(0);
 
-    m_program->release();
+    program_->release();
 
     /* --- Grid --- */
     if (drawGrid_)
     {
         gridProgram_->bind();
-        QMatrix4x4 mvp = m_projMatrix * camera_->getViewMatrix();
+        QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
         gridProgram_->setUniformValue("u_mvp", mvp);
         glBindVertexArray(gridVao_);
         glDrawArrays(GL_LINES, 0, gridVertexCount_);
         glBindVertexArray(0);
         gridProgram_->release();
     }
+
+    {
+        // OpenGL ↔ QPainter 혼용 시 깊이 테스트는 끄는 편이 안전
+        glDisable(GL_DEPTH_TEST);
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::TextAntialiasing, true);
+        painter.setPen(Qt::white); // 필요하면 색상 조절
+        drawAxisLabels(painter, mvp, width(), height());
+        painter.end();
+
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
-void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI>& src)
+void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &src)
 {
     makeCurrent();
+    constexpr float KITTI_SENSOR_HEIGHT = 1.73f;
 
-    m_pointCloud.resize(src.size());
-    std::transform(src.begin(), src.end(), m_pointCloud.begin(),
-                   [](const PointXYZI& p){
-                       // (x, y, z) -> (x, z, -y)
-                       return PointXYZI{ p.x, p.z, -p.y, p.intensity };
+    pointCloud_.resize(src.size());
+    std::transform(src.begin(), src.end(), pointCloud_.begin(),
+                   [](const PointXYZI &p)
+                   {
+                       return PointXYZI{
+                           p.x,
+                           p.z + KITTI_SENSOR_HEIGHT,
+                           -p.y,
+                           p.intensity};
                    });
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
     glBufferData(GL_ARRAY_BUFFER,
-                 m_pointCloud.size() * sizeof(PointXYZI),
-                 m_pointCloud.data(), GL_DYNAMIC_DRAW);
+                 pointCloud_.size() * sizeof(PointXYZI),
+                 pointCloud_.data(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     update();
 }
 
 void PointCloudViewer::mousePressEvent(QMouseEvent *e)
 {
-    m_lastMousePos = e->pos();
+    lastMousePos_ = e->pos();
 }
 
 void PointCloudViewer::mouseMoveEvent(QMouseEvent *e)
 {
-    if (e->buttons() & Qt::LeftButton)
+    const QPoint delta = e->pos() - lastMousePos_;
+
+    if (e->buttons() & Qt::RightButton)
     {
-        const QPoint delta = e->pos() - m_lastMousePos;
         camera_->rotate(delta.x(), delta.y());
-        update(); // 다시 그리기
     }
-    m_lastMousePos = e->pos();
+    else if (e->buttons() & Qt::LeftButton)
+    {
+        camera_->pan(delta.x(), -delta.y(),
+                     height(),
+                     45.0f);
+    }
+
+    update();
+    lastMousePos_ = e->pos();
 }
 
 void PointCloudViewer::wheelEvent(QWheelEvent *e)
@@ -130,42 +159,121 @@ void PointCloudViewer::wheelEvent(QWheelEvent *e)
     update();
 }
 
-// Grid용 POC 메서드
-void PointCloudViewer::initGrid()
+void PointCloudViewer::keyPressEvent(QKeyEvent *e)
 {
-    // 1. 셰이더
-    gridProgram_ = ShaderProgram::create(":/shader/grid.vs", ":/shader/grid.fs");
-
-    // 2. 정점 데이터 생성 (XZ 평면, Y=0)
-    constexpr int GRID_SIZE = 50;     // -50 ~ +50
-    constexpr float STEP = 1.0f;
-    std::vector<float> verts;
-    verts.reserve((GRID_SIZE*2+1)*4*3);   // 404*3 floats
-
-    // x 축 평행선들 (Z 고정)
-    for (int i=-GRID_SIZE; i<=GRID_SIZE; ++i) {
-        float z = i * STEP;
-        verts.insert(verts.end(), { -GRID_SIZE*STEP, 0.f, z,
-                                     GRID_SIZE*STEP, 0.f, z });
+    if (e->key() == Qt::Key_O && // ‘o’ 또는 ‘O’
+        !(e->modifiers() & (Qt::ControlModifier |
+                            Qt::ShiftModifier |
+                            Qt::AltModifier)))
+    {
+        camera_->reset();
+        update();
+        return;
     }
-    // z 축 평행선들 (X 고정)
-    for (int i=-GRID_SIZE; i<=GRID_SIZE; ++i) {
-        float x = i * STEP;
-        verts.insert(verts.end(), { x, 0.f, -GRID_SIZE*STEP,
-                                    x, 0.f,  GRID_SIZE*STEP });
-    }
-    gridVertexCount_ = static_cast<int>(verts.size() / 3);
+    QOpenGLWidget::keyPressEvent(e);
+}
 
-    // 3. OpenGL VAO/VBO
+void PointCloudViewer::buildGrid(float step)
+{
+    // 이전 버퍼 존재하면 정리
+    if (gridVbo_)
+        glDeleteBuffers(1, &gridVbo_);
+    if (gridVao_)
+        glDeleteVertexArrays(1, &gridVao_);
+    gridVao_ = gridVbo_ = 0;
+
+    // 셰이더는 한 번만 만들면 되므로 처음 호출 때 초기화
+    if (!gridProgram_)
+        gridProgram_ = ShaderProgram::create(":/shader/grid.vs", ":/shader/grid.fs");
+
+    constexpr float EXTENT = 75.f; // -750 m ~ +75 m
+    std::vector<float> v;
+    const int lines = static_cast<int>((EXTENT * 2) / step) + 1;
+    v.reserve(lines * 4 * 3);
+
+    // X축과 평행(Z 고정)
+    for (float z = -EXTENT; z <= EXTENT + 0.001f; z += step)
+        v.insert(v.end(), {-EXTENT, 0.f, z,
+                           EXTENT, 0.f, z});
+    // Z축과 평행(X 고정)
+    for (float x = -EXTENT; x <= EXTENT + 0.001f; x += step)
+        v.insert(v.end(), {x, 0.f, -EXTENT,
+                           x, 0.f, EXTENT});
+
+    gridVertexCount_ = static_cast<int>(v.size() / 3);
+
     glGenVertexArrays(1, &gridVao_);
     glGenBuffers(1, &gridVbo_);
 
     glBindVertexArray(gridVao_);
     glBindBuffer(GL_ARRAY_BUFFER, gridVbo_);
-    glBufferData(GL_ARRAY_BUFFER, verts.size()*sizeof(float),
-                 verts.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glBufferData(GL_ARRAY_BUFFER, v.size() * sizeof(float), v.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+void PointCloudViewer::updateGridIfNeeded()
+{
+    const float r = camera_->getRadius();
+
+    float desired;
+    if (r > 150.f)
+        desired = 10.f;
+    else if (r > 70.f)
+        desired = 5.f;
+    else if (r > 25.f)
+        desired = 2.f;
+    else if (r > 7.f)
+        desired = 1.f;
+    else
+        desired = 0.5f;
+
+    if (qFuzzyCompare(desired, currentGridStep_)) // 이미 그 간격이면 패스
+        return;
+
+    currentGridStep_ = desired;
+    buildGrid(desired); // 새 VBO 생성
+}
+
+void PointCloudViewer::drawAxisLabels(QPainter &p,
+                                      const QMatrix4x4 &mvp,
+                                      int viewW, int viewH)
+{
+    auto project = [&](const QVector3D &world) -> std::optional<QPoint>
+    {
+        QVector4D clip = mvp * QVector4D(world, 1.0f);
+        if (clip.w() <= 0.0f)
+            return std::nullopt;                 // 카메라 뒤
+        QVector3D ndc = clip.toVector3DAffine(); // -1 ~ 1
+        if (ndc.x() < -1.f || ndc.x() > 1.f ||
+            ndc.y() < -1.f || ndc.y() > 1.f)
+            return std::nullopt; // 화면 밖
+        int sx = int((ndc.x() * 0.5f + 0.5f) * viewW);
+        int sy = int((-ndc.y() * 0.5f + 0.5f) * viewH);
+        return QPoint(sx, sy);
+    };
+
+    const float step = currentGridStep_;
+    const int digits = (step < 1.f) ? 1 : 0;
+    constexpr float EXTENT = 75.f; // buildGrid와 동일
+
+    // X축 위 라벨
+    for (float x = -EXTENT; x <= EXTENT + 0.001f; x += step)
+    {
+        if (qFuzzyIsNull(x))
+            continue; // 0은 생략
+        if (auto pt = project({x, 0.f, 0.f}))
+            p.drawText(*pt, QString::number(x, 'f', digits) + "m");
+    }
+
+    // Z축 위 라벨
+    for (float z = -EXTENT; z <= EXTENT + 0.001f; z += step)
+    {
+        if (qFuzzyIsNull(z))
+            continue;
+        if (auto pt = project({0.f, 0.f, z}))
+            p.drawText(*pt, QString::number(z, 'f', digits) + "m");
+    }
 }
