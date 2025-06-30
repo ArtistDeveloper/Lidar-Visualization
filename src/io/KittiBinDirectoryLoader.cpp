@@ -1,6 +1,7 @@
 #include "KittiBinDirectoryLoader.h"
 
 #include <QDir>
+#include <QCoreApplication>
 
 std::vector<std::vector<PointXYZI>> KittiBinDirectoryLoader::loadFromFolder(const QString &folderPath)
 {
@@ -12,6 +13,7 @@ std::vector<std::vector<PointXYZI>> KittiBinDirectoryLoader::loadFromFolder(cons
         auto points = KittiBinFileReader::loadKittiBinFile(path);
         allPoints.push_back(points);
         emit progressUpdated(i + 1);
+        QCoreApplication::processEvents();
     }
     return allPoints;
 }

@@ -28,9 +28,6 @@ void LoadFolderController::load(const QString& folder)
     showProgressDialog(total);
 
     connect(&loader, &KittiBinDirectoryLoader::progressUpdated, progressDlg_, &ProgressDialog::updateProgress);
-
-    QCoreApplication::processEvents();
-
     auto data = loader.loadFromFolder(folder);
 
     progressDlg_->close();
