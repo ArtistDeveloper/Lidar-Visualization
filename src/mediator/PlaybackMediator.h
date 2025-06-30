@@ -5,17 +5,17 @@
 
 #include "PointTypes.h"
 
-class LoadFolderButton;
 class PointCloudPlayerWidget;
 class PointCloudPlayer;
 class PointCloudViewer;
 class LoadFolderController;
+class MenuButton;
 
 class PlaybackMediator : public QObject
 {
     Q_OBJECT
 public:
-    PlaybackMediator(LoadFolderButton *openBtn,
+    PlaybackMediator(MenuButton *openBtn,
                      PointCloudPlayerWidget *controls,
                      PointCloudViewer *viewer,
                      QObject *parent = nullptr);
@@ -39,7 +39,7 @@ private slots:
 private:
     void loadFolder(const QString &dir);
 
-    LoadFolderButton *openBtn_;
+    MenuButton *menuBtn_;
     PointCloudPlayerWidget *controls_;
     PointCloudViewer *viewer_;
     std::unique_ptr<PointCloudPlayer> player_;

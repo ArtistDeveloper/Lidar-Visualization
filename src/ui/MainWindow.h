@@ -6,7 +6,6 @@
 
 #include "PointTypes.h"
 
-class LoadFolderButton;
 class PointCloudViewer;
 class PointCloudPlayer;
 class PointCloudPlayerWidget;
@@ -25,12 +24,9 @@ private:
     void setupMediator();
 
     PointCloudViewer *glWidget_;
-    LoadFolderButton *openFolderBtn_;
     PointCloudPlayerWidget *playerWidget_;
     PlaybackMediator *mediator_;
-
-    MenuButton* menuButton_;
-    // QPushButton* menuButton_;
+    MenuButton* menuBtn_;
 
 signals:
     void dataLoaded(const std::vector<std::vector<PointXYZI>> &data);

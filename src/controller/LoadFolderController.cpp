@@ -1,11 +1,11 @@
-// src/controller/LoadFolderController.cpp
 #include "LoadFolderController.h"
-#include "ProgressDialog.h"
-#include "KittiBinDirectoryLoader.h"
-#include "CustomBinFileLoader.h"
 
 #include <QDir>
 #include <QCoreApplication>
+
+#include "ProgressDialog.h"
+#include "KittiBinDirectoryLoader.h"
+#include "CustomBinFileLoader.h"
 
 LoadFolderController::LoadFolderController(QObject* parent)
     : QObject(parent)
@@ -27,8 +27,7 @@ void LoadFolderController::load(const QString& folder)
     KittiBinDirectoryLoader loader;
     showProgressDialog(total);
 
-    connect(&loader, &KittiBinDirectoryLoader::progressUpdated,
-            progressDlg_, &ProgressDialog::updateProgress);
+    connect(&loader, &KittiBinDirectoryLoader::progressUpdated, progressDlg_, &ProgressDialog::updateProgress);
 
     QCoreApplication::processEvents();
 

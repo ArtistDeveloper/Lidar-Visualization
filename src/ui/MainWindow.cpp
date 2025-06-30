@@ -5,7 +5,6 @@
 
 #include "PlaybackMediator.h"
 #include "PointCloudViewer.h"
-#include "LoadFolderButton.h"
 #include "PointCloudPlayerWidget.h"
 #include "MenuButton.h"
 
@@ -20,9 +19,8 @@ void MainWindow::setupUI()
     QWidget *centralWidget = new QWidget;
 
     glWidget_ = new PointCloudViewer(centralWidget);
-    openFolderBtn_ = new LoadFolderButton(glWidget_);
     playerWidget_ = new PointCloudPlayerWidget;
-    menuButton_ = new MenuButton(centralWidget);
+    menuBtn_ = new MenuButton(centralWidget);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(glWidget_);
@@ -39,7 +37,7 @@ void MainWindow::setupUI()
 
 void MainWindow::setupMediator()
 {
-    mediator_ = new PlaybackMediator(openFolderBtn_,  // 그대로 유지
+    mediator_ = new PlaybackMediator(menuBtn_,  // 그대로 유지
                                      playerWidget_,
                                      glWidget_,
                                      this);

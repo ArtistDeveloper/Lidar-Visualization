@@ -8,7 +8,7 @@ Player와 Widget 간의 양방향 이벤트를 중재하는 허브용도로 사�
 #include <QDir>
 #include <QCoreApplication>
 
-#include "LoadFolderButton.h"
+#include "MenuButton.h"
 #include "PointCloudPlayerWidget.h"
 #include "PointCloudViewer.h"
 #include "PointCloudPlayer.h"
@@ -16,17 +16,17 @@ Player와 Widget 간의 양방향 이벤트를 중재하는 허브용도로 사�
 #include "KittiBinDirectoryLoader.h"
 #include "LoadFolderController.h"
 
-PlaybackMediator::PlaybackMediator(LoadFolderButton *openBtn,
+PlaybackMediator::PlaybackMediator(MenuButton *openBtn,
                                    PointCloudPlayerWidget *controls,
                                    PointCloudViewer *viewer,
                                    QObject *parent)
     : QObject(parent),
-      openBtn_(openBtn), controls_(controls), viewer_(viewer),
+      menuBtn_(openBtn), controls_(controls), viewer_(viewer),
       player_(std::make_unique<PointCloudPlayer>()),
       loaderCtl_(std::make_unique<LoadFolderController>(this))
 {
     // Folder 선택 → Loader
-    connect(openBtn_, &LoadFolderButton::folderSelected, loaderCtl_.get(), &LoadFolderController::load);
+    connect(menuBtn_, &MenuButton::folderSelected, loaderCtl_.get(), &LoadFolderController::load);
         
     // Loader 완료 → Mediator
     connect(loaderCtl_.get(), &LoadFolderController::finished, this, &PlaybackMediator::onDataLoaded);
