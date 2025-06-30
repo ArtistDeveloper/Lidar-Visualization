@@ -1,6 +1,7 @@
 add_library(ui STATIC
     MainWindow.cpp MainWindow.h
     buttons/LoadFolderButton.cpp buttons/LoadFolderButton.h
+    buttons/MenuButton.cpp buttons/MenuButton.h
     widgets/PointCloudViewer.cpp widgets/PointCloudViewer.h
     widgets/PointCloudPlayerWidget.cpp widgets/PointCloudPlayerWidget.h
     dialogs/ProgressDialog.cpp dialogs/ProgressDialog.h

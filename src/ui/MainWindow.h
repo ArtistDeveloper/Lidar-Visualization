@@ -11,6 +11,7 @@ class PointCloudViewer;
 class PointCloudPlayer;
 class PointCloudPlayerWidget;
 class PlaybackMediator;
+class MenuButton;
 
 class MainWindow : public QMainWindow
 {
@@ -28,7 +29,8 @@ private:
     PointCloudPlayerWidget *playerWidget_;
     PlaybackMediator *mediator_;
 
-    QPushButton* menuButton_;
+    MenuButton* menuButton_;
+    // QPushButton* menuButton_;
 
 signals:
     void dataLoaded(const std::vector<std::vector<PointXYZI>> &data);

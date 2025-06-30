@@ -7,6 +7,7 @@
 #include "PointCloudViewer.h"
 #include "LoadFolderButton.h"
 #include "PointCloudPlayerWidget.h"
+#include "MenuButton.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
@@ -21,28 +22,7 @@ void MainWindow::setupUI()
     glWidget_ = new PointCloudViewer(centralWidget);
     openFolderBtn_ = new LoadFolderButton(glWidget_);
     playerWidget_ = new PointCloudPlayerWidget;
-
-    menuButton_ = new QPushButton(QIcon(":/assets/menu.png"), "", centralWidget);
-    menuButton_->move(10, 10);
-    menuButton_->setFixedSize(100, 100);
-    menuButton_->setIconSize(QSize(100, 100));
-    // menuButton_->setStyleSheet("QPushButton { border: none; background: transparent; }");
-    // menuButton_->setText("메뉴");
-    qDebug() << QIcon(":/assets/menu.png").isNull();
-
-
-    QMenu* menu = new QMenu(this);
-    QAction* openKittiAction = new QAction("Open Kitti Data Folder", this);
-    QAction* openFieldAction = new QAction("Open Field Data", this);
-    menu->addAction(openKittiAction);
-    menu->addAction(openFieldAction);
-
-    connect(menuButton_, &QPushButton::clicked, this, [=]() {
-        menu->exec(menuButton_->mapToGlobal(QPoint(0, menuButton_->height())));
-    });
-
-    connect(openKittiAction, &QAction::triggered, openFolderBtn_, &LoadFolderButton::chooseFolder);
-    connect(openFieldAction, &QAction::triggered, openFolderBtn_, &LoadFolderButton::chooseFieldData);
+    menuButton_ = new MenuButton(centralWidget);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(glWidget_);
