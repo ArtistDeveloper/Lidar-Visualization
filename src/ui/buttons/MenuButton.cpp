@@ -2,7 +2,7 @@
 
 #include <QFileDialog>
 
-MenuButton::MenuButton(QWidget *parent) : QPushButton(QIcon(":/assets/menu.png"), "", parent)
+MenuButton::MenuButton(QWidget *parent) : QPushButton(QIcon(":/assets/buttons/menu.png"), "", parent)
 {
     move(10, 10);
     setFixedSize(100, 100);
