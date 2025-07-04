@@ -45,6 +45,13 @@ PlaybackMediator::PlaybackMediator(MenuButton *openBtn,
     connect(player_.get(), &PointCloudPlayer::frameChanged, this, &PlaybackMediator::onFrameChanged);
     connect(player_.get(), &PointCloudPlayer::frameIndexChanged, this, &PlaybackMediator::onFrameIndexChanged);
     connect(player_.get(), &PointCloudPlayer::playbackStopped, this, &PlaybackMediator::onPlaybackStopped);
+
+    // NOTE: data가 새로 로드되었을 때, player와 control 초기화, 추후 기능 확인
+    // connect(repo_.get(), &PointCloudRepository::dataReset,
+    //     this, [this] {
+    //         player_->setDataSource(repo_->dataPtr());
+    //         controls_->setMaximum(player_->totalFrames() - 1);
+    //     });
 }
 
 /* ---------- UI 이벤트 (controls) ---------- */
