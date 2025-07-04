@@ -11,7 +11,9 @@ public:
     explicit PointCloudRepository(QObject* parent = nullptr);
 
     // loader 쪽에서 std::move로 넘겨 받음
-    void setPointCloudData(std::vector<std::vector<PointXYZI>> data);
+    void setPointCloudData(std::shared_ptr<std::vector<std::vector<PointXYZI>>> data);
+
+    // 읽는 쪽에 벡터 참조 반환
     const std::vector<std::vector<PointXYZI>>& pointCloudData() const;
 
 signals:

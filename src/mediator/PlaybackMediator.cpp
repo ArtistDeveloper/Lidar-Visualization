@@ -99,6 +99,8 @@ void PlaybackMediator::onDataLoaded(std::shared_ptr<std::vector<std::vector<Poin
 {
     if (!data || data->empty())
         return;
+    repo_->setPointCloudData(data);
+
     player_->setEntireData(*data);
     controls_->setMaximum(static_cast<int>(data->size()) - 1);
 }
