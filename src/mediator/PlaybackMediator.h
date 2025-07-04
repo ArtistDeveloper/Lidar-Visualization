@@ -10,6 +10,7 @@ class PointCloudPlayer;
 class PointCloudViewer;
 class LoadFolderController;
 class MenuButton;
+class PointCloudRepository;
 
 class PlaybackMediator : public QObject
 {
@@ -18,7 +19,9 @@ public:
     PlaybackMediator(MenuButton *openBtn,
                      PointCloudPlayerWidget *controls,
                      PointCloudViewer *viewer,
-                     QObject *parent = nullptr);
+                     std::shared_ptr<PointCloudRepository> repo,
+                     QObject *parent = nullptr
+                     );
 
 private slots:
     // UI에서 온 요청
@@ -44,4 +47,5 @@ private:
     PointCloudViewer *viewer_;
     std::unique_ptr<PointCloudPlayer> player_;
     std::unique_ptr<LoadFolderController> loaderCtl_;
+    std::shared_ptr<PointCloudRepository> repo_;
 };

@@ -15,15 +15,20 @@ Player와 Widget 간의 양방향 이벤트를 중재하는 허브용도로 사�
 #include "ProgressDialog.h"
 #include "KittiBinDirectoryLoader.h"
 #include "LoadFolderController.h"
+#include "PointCloudRepository.h"
 
 PlaybackMediator::PlaybackMediator(MenuButton *openBtn,
                                    PointCloudPlayerWidget *controls,
                                    PointCloudViewer *viewer,
-                                   QObject *parent)
+                                   std::shared_ptr<PointCloudRepository> repo,
+                                   QObject *parent
+                                   )
     : QObject(parent),
       menuBtn_(openBtn), controls_(controls), viewer_(viewer),
+      repo_(std::move(repo)),
       player_(std::make_unique<PointCloudPlayer>()),
-      loaderCtl_(std::make_unique<LoadFolderController>(this))
+      loaderCtl_(std::make_unique<LoadFolderController>(this)
+      )
 {
     // Folder 선택 → Loader
     connect(menuBtn_, &MenuButton::folderSelected, loaderCtl_.get(), &LoadFolderController::load);

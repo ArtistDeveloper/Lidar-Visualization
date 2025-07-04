@@ -8,7 +8,7 @@
 #include "PointCloudPlayerWidget.h"
 #include "MenuButton.h"
 
-MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
+MainWindow::MainWindow(std::shared_ptr<PointCloudRepository> repo, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), repo_(std::move(repo))
 {
     setupUI();
     setupMediator();
@@ -40,5 +40,6 @@ void MainWindow::setupMediator()
     mediator_ = new PlaybackMediator(menuBtn_,  // 그대로 유지
                                      playerWidget_,
                                      glWidget_,
+                                     repo_,
                                      this);
 }

@@ -11,13 +11,16 @@ class PointCloudPlayer;
 class PointCloudPlayerWidget;
 class PlaybackMediator;
 class MenuButton;
+class PointCloudRepository;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
+    explicit MainWindow(
+        std::shared_ptr<PointCloudRepository> repo, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags()
+    );
 
 private:
     void setupUI();
@@ -26,10 +29,6 @@ private:
     PointCloudViewer *glWidget_;
     PointCloudPlayerWidget *playerWidget_;
     PlaybackMediator *mediator_;
-    MenuButton* menuBtn_;
-
-signals:
-    void dataLoaded(const std::vector<std::vector<PointXYZI>> &data);
-
-private slots:
+    MenuButton *menuBtn_;
+    std::shared_ptr<PointCloudRepository> repo_;
 };
