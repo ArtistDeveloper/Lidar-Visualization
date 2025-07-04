@@ -9,10 +9,13 @@ PointCloudPlayer::PointCloudPlayer(QObject *parent) : QObject(parent)
     timer_.setInterval(kitti_frame_rate);  // 0.5초 간격
 }
 
-void PointCloudPlayer::setEntireData(const std::vector<std::vector<PointXYZI>> &data)
+void PointCloudPlayer::setDataSource(std::shared_ptr<const std::vector<std::vector<PointXYZI>>> data)
 {
-    data_ = data;
-    emit frameChanged(data_[0]);
+    data_ = std::move(data);
+    currentFrame_ = 0;
+
+    if (data_ && !data_->empty())
+        emit frameChanged((*data_)[0]);   // 첫 프레임 뿌려주기
 }
 
 void PointCloudPlayer::play()
@@ -28,37 +31,37 @@ void PointCloudPlayer::pause()
 
 void PointCloudPlayer::nextFrame()
 {
-    if (data_.empty())
+    if (data_->empty())
         return;
 
-    if (currentFrame_ < static_cast<int>(data_.size()) - 1)
+    if (currentFrame_ < static_cast<int>(data_->size()) - 1)
     {
         ++currentFrame_;
-        emit frameChanged(data_[currentFrame_]);
+        emit frameChanged((*data_)[currentFrame_]);
         emit frameIndexChanged(currentFrame_);
     }
 }
 
 void PointCloudPlayer::prevFrame()
 {
-    if (data_.empty())
+    if (data_->empty())
         return;
 
     if (currentFrame_ > 0)
     {
         --currentFrame_;
-        emit frameChanged(data_[currentFrame_]);
+        emit frameChanged((*data_)[currentFrame_]);
         emit frameIndexChanged(currentFrame_);
     }
 }
 
 void PointCloudPlayer::setFrame(int index)
 {
-    if (data_.empty() || index < 0 || index >= static_cast<int>(data_.size()))
+    if (data_->empty() || index < 0 || index >= static_cast<int>(data_->size()))
         return;
 
     currentFrame_ = index;
-    emit frameChanged(data_[currentFrame_]);
+    emit frameChanged((*data_)[currentFrame_]);
     emit frameIndexChanged(currentFrame_);
 }
 
@@ -69,12 +72,12 @@ int PointCloudPlayer::currentFrame() const
 
 int PointCloudPlayer::totalFrames() const
 {
-    throw std::logic_error("totalFrames() is not implemented yet.");
+    return data_ ? static_cast<int>(data_->size()) : 0;
 }
 
 void PointCloudPlayer::onTimeout()
 {
-    if (currentFrame_ >= static_cast<int>(data_.size()) - 1) {
+    if (currentFrame_ >= static_cast<int>(data_->size()) - 1) {
         timer_.stop();
         emit playbackStopped();  // 자동 중지 시 UI 알림
         return;

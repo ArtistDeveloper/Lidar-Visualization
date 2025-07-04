@@ -11,7 +11,7 @@ class PointCloudPlayer : public QObject
 
 public:
     explicit PointCloudPlayer(QObject *parent = nullptr);
-    void setEntireData(const std::vector<std::vector<PointXYZI>> &data);
+    void setDataSource(std::shared_ptr<const std::vector<std::vector<PointXYZI>>> data);
     void play();
     void pause();
     void nextFrame();
@@ -30,7 +30,7 @@ private slots:
     void onTimeout();
 
 private:
-    std::vector<std::vector<PointXYZI>> data_;
+    std::shared_ptr<const std::vector<std::vector<PointXYZI>>> data_; // 얕은 참조
     const int kitti_frame_rate = 100;
     int currentFrame_ = 0;
     QTimer timer_;

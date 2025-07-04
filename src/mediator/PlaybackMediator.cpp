@@ -21,18 +21,16 @@ PlaybackMediator::PlaybackMediator(MenuButton *openBtn,
                                    PointCloudPlayerWidget *controls,
                                    PointCloudViewer *viewer,
                                    std::shared_ptr<PointCloudRepository> repo,
-                                   QObject *parent
-                                   )
+                                   QObject *parent)
     : QObject(parent),
       menuBtn_(openBtn), controls_(controls), viewer_(viewer),
       repo_(std::move(repo)),
       player_(std::make_unique<PointCloudPlayer>()),
-      loaderCtl_(std::make_unique<LoadFolderController>(this)
-      )
+      loaderCtl_(std::make_unique<LoadFolderController>(this))
 {
     // Folder 선택 → Loader
     connect(menuBtn_, &MenuButton::folderSelected, loaderCtl_.get(), &LoadFolderController::load);
-        
+
     // Loader 완료 → Mediator
     connect(loaderCtl_.get(), &LoadFolderController::finished, this, &PlaybackMediator::onDataLoaded);
 
@@ -99,8 +97,8 @@ void PlaybackMediator::onDataLoaded(std::shared_ptr<std::vector<std::vector<Poin
 {
     if (!data || data->empty())
         return;
-    repo_->setPointCloudData(data);
 
-    player_->setEntireData(*data);
-    controls_->setMaximum(static_cast<int>(data->size()) - 1);
+    repo_->setPointCloudData(std::move(data)); // 레포지토리에 데이터 삽입
+    player_->setDataSource(repo_->dataPtr());  // 같은 포인터를 Player에 전달
+    controls_->setMaximum(player_->totalFrames() - 1);
 }
