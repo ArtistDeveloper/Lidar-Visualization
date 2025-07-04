@@ -16,7 +16,7 @@ public slots:
     void loadFieldData(const QString& filePath);
 
 signals:
-    void finished(const std::vector<std::vector<PointXYZI>>& data);
+    void finished(std::shared_ptr<std::vector<std::vector<PointXYZI>>> data);
 
 private:
     void showProgressDialog(int total);

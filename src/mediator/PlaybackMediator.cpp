@@ -95,10 +95,10 @@ void PlaybackMediator::onPlaybackStopped()
 
 /* ---------- 데이터 로드 결과 ---------- */
 
-void PlaybackMediator::onDataLoaded(const std::vector<std::vector<PointXYZI>> &data)
+void PlaybackMediator::onDataLoaded(std::shared_ptr<std::vector<std::vector<PointXYZI>>> data)
 {
-    if (data.empty())
+    if (!data || data->empty())
         return;
-    player_->setEntireData(data);
-    controls_->setMaximum(static_cast<int>(data.size()) - 1);
+    player_->setEntireData(*data);
+    controls_->setMaximum(static_cast<int>(data->size()) - 1);
 }

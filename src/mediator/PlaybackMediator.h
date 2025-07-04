@@ -37,7 +37,7 @@ private slots:
     void onPlaybackStopped();
 
     // 데이터 로더 → Mediator
-    void onDataLoaded(const std::vector<std::vector<PointXYZI>> &data);
+    void onDataLoaded(std::shared_ptr<std::vector<std::vector<PointXYZI>>> data);
 
 private:
     void loadFolder(const QString &dir);

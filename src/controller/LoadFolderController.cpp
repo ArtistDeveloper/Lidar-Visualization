@@ -28,11 +28,13 @@ void LoadFolderController::load(const QString& folder)
     showProgressDialog(total);
 
     connect(&loader, &KittiBinDirectoryLoader::progressUpdated, progressDlg_, &ProgressDialog::updateProgress);
-    auto data = loader.loadFromFolder(folder);
+    std::vector<std::vector<PointXYZI>> vec = loader.loadFromFolder(folder);
 
     progressDlg_->close();
     progressDlg_->deleteLater();
     progressDlg_ = nullptr;
+
+    std::shared_ptr<std::vector<std::vector<PointXYZI>>> data = std::make_shared<std::vector<std::vector<PointXYZI>>>(std::move(vec));
 
     emit finished(data);
 }
@@ -44,11 +46,13 @@ void LoadFolderController::loadFieldData(const QString& filePath)
     showProgressDialog(1);
     QCoreApplication::processEvents();
 
-    auto data = loader.loadFromFile(filePath);  // 아직 구현 안 된 부분
+    std::vector<std::vector<PointXYZI>> vec = loader.loadFromFile(filePath);  // 아직 구현 안 된 부분
 
     progressDlg_->close();
     progressDlg_->deleteLater();
     progressDlg_ = nullptr;
+
+    std::shared_ptr<std::vector<std::vector<PointXYZI>>> data = std::make_shared<std::vector<std::vector<PointXYZI>>>(std::move(vec));
 
     emit finished(data);
 }
