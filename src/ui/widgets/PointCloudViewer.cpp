@@ -99,7 +99,6 @@ void PointCloudViewer::paintGL()
     // 5. FPS 계산
     ++fpsFrameCount_;
     const qint64 elapsedMs = fpsTimer_.elapsed(); // ms
-    qDebug() << elapsedMs;
     if (elapsedMs >= 500) // 0.5 초마다 갱신
     { 
         currentFps_ = fpsFrameCount_ * 1000.f / static_cast<float>(elapsedMs);
