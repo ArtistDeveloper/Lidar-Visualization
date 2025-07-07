@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QElapsedTimer>
 
 #include "PointTypes.h"
 #include "ShaderProgram.h"
@@ -12,6 +13,7 @@ PointCloudViewer::PointCloudViewer(QWidget *parent)
     : QOpenGLWidget(parent),
       camera_(std::make_unique<OrbitCamera>())
 {
+    fpsTimer_.start();
 }
 
 PointCloudViewer::~PointCloudViewer()
@@ -62,48 +64,153 @@ void PointCloudViewer::resizeGL(int w, int h)
 
 void PointCloudViewer::paintGL()
 {
+    // 1. 줌 레벨에 맞춰 그리드 간격 재조정
     updateGridIfNeeded();
 
+    // 2. 컬러, 깊이 버퍼 클리어
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // 3. 포인트 클라우드 렌더링
     program_->bind();
 
-    // MVP 행렬 계산 및 전송
     QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
     program_->setUniformValue("u_mvp", mvp);
 
     glBindVertexArray(vao_);
-    glDrawArrays(GL_POINTS, 0, pointCloud_.size());
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(pointCloud_.size()));
     glBindVertexArray(0);
 
     program_->release();
 
-    /* --- Grid --- */
+    // 4. 바닥 그리드
     if (drawGrid_)
     {
         gridProgram_->bind();
-        QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
         gridProgram_->setUniformValue("u_mvp", mvp);
+
         glBindVertexArray(gridVao_);
         glDrawArrays(GL_LINES, 0, gridVertexCount_);
         glBindVertexArray(0);
+
         gridProgram_->release();
     }
 
+    // 5. FPS 계산
+    ++fpsFrameCount_;
+    const qint64 elapsedMs = fpsTimer_.elapsed(); // ms
+    qDebug() << elapsedMs;
+    if (elapsedMs >= 500) // 0.5 초마다 갱신
+    { 
+        currentFps_ = fpsFrameCount_ * 1000.f / static_cast<float>(elapsedMs);
+        fpsFrameCount_ = 0;
+        fpsTimer_.restart();
+    }
+
+    // 6. 2D 오버레이(QPainter)
     {
-        // OpenGL ↔ QPainter 혼용 시 깊이 테스트는 끄는 편이 안전
+        // OpenGL, QPainter 혼용 시 깊이 테스트는 끄는 편이 안전
         glDisable(GL_DEPTH_TEST);
 
         QPainter painter(this);
         painter.setRenderHint(QPainter::TextAntialiasing, true);
-        painter.setPen(Qt::white); // 필요하면 색상 조절
+        painter.setPen(Qt::white);
+
+        // 6-1. 축 라벨
         drawAxisLabels(painter, mvp, width(), height());
+
+        // 6-2. FPS 텍스트
+        if (showFps_)
+        {
+            const QString fpsTxt = QString("FPS: %1").arg(currentFps_, 0, 'f', 1);
+
+            const int margin = 10;
+            const QFontMetrics fm = painter.fontMetrics();
+            const int textW = fm.horizontalAdvance(fpsTxt);
+
+            painter.drawText(width() - textW - margin,
+                             margin + fm.ascent(),
+                             fpsTxt);
+        }
+
+        // painter 소멸자에서 end() 가 호출되지만, 가독성을 위해 명시
         painter.end();
 
         glEnable(GL_DEPTH_TEST);
+
+        if (showFps_) update();
     }
 }
+
+void PointCloudViewer::keyPressEvent(QKeyEvent *e)
+{
+    // FPS 토글
+    if (e->key() == Qt::Key_BracketRight &&
+        !(e->modifiers() & (Qt::ControlModifier |
+                            Qt::ShiftModifier |
+                            Qt::AltModifier)))
+    {
+        showFps_ = !showFps_;
+        update();
+        return;
+    }
+
+    // 카메라 정보 초기화
+    if (e->key() == Qt::Key_O &&
+        !(e->modifiers() & (Qt::ControlModifier |
+                            Qt::ShiftModifier |
+                            Qt::AltModifier)))
+    {
+        camera_->reset();
+        update();
+        return;
+    }
+    QOpenGLWidget::keyPressEvent(e);
+}
+
+// void PointCloudViewer::paintGL()
+// {
+//     updateGridIfNeeded();
+
+//     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
+//     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//     program_->bind();
+
+//     // MVP 행렬 계산 및 전송
+//     QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
+//     program_->setUniformValue("u_mvp", mvp);
+
+//     glBindVertexArray(vao_);
+//     glDrawArrays(GL_POINTS, 0, pointCloud_.size());
+//     glBindVertexArray(0);
+
+//     program_->release();
+
+//     /* --- Grid --- */
+//     if (drawGrid_)
+//     {
+//         gridProgram_->bind();
+//         QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
+//         gridProgram_->setUniformValue("u_mvp", mvp);
+//         glBindVertexArray(gridVao_);
+//         glDrawArrays(GL_LINES, 0, gridVertexCount_);
+//         glBindVertexArray(0);
+//         gridProgram_->release();
+//     }
+//     {
+//         // OpenGL ↔ QPainter 혼용 시 깊이 테스트는 끄는 편이 안전
+//         glDisable(GL_DEPTH_TEST);
+
+//         QPainter painter(this);
+//         painter.setRenderHint(QPainter::TextAntialiasing, true);
+//         painter.setPen(Qt::white); // 필요하면 색상 조절
+//         drawAxisLabels(painter, mvp, width(), height());
+//         painter.end();
+
+//         glEnable(GL_DEPTH_TEST);
+//     }
+// }
 
 void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &src)
 {
@@ -157,20 +264,6 @@ void PointCloudViewer::wheelEvent(QWheelEvent *e)
 {
     camera_->zoom(e->angleDelta().y());
     update();
-}
-
-void PointCloudViewer::keyPressEvent(QKeyEvent *e)
-{
-    if (e->key() == Qt::Key_O && // ‘o’ 또는 ‘O’
-        !(e->modifiers() & (Qt::ControlModifier |
-                            Qt::ShiftModifier |
-                            Qt::AltModifier)))
-    {
-        camera_->reset();
-        update();
-        return;
-    }
-    QOpenGLWidget::keyPressEvent(e);
 }
 
 void PointCloudViewer::buildGrid(float step)

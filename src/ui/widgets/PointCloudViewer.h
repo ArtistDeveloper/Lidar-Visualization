@@ -4,6 +4,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 #include <QPainter>
+#include <QElapsedTimer>
 
 #include "PointTypes.h"
 
@@ -43,7 +44,7 @@ private:
     std::vector<PointXYZI> pointCloud_;
     std::unique_ptr<OrbitCamera> camera_;
 
-    /* 새 항목 ― Grid --------------------------------- */
+    /* --- Grid --- */
     void initGrid();
     GLuint gridVao_{0};
     GLuint gridVbo_{0};
@@ -54,4 +55,10 @@ private:
     void buildGrid(float step);
     void updateGridIfNeeded();    // 스텝 변경 감지
     float currentGridStep_{-1.f}; // 현재 생성된 간격
+
+    /* --- FPS 계측 --- */
+    bool           showFps_{true};   // ‘]’ 로 토글
+    QElapsedTimer  fpsTimer_;
+    int            fpsFrameCount_{0};
+    float          currentFps_{0.f};
 };
