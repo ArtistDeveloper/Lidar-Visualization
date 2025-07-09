@@ -10,7 +10,7 @@ add_subdirectory(controller)
 # 자동으로 정적 QT Build의 QT 플러그인을 링킹,
 # 플랫폼별 라이브러리 이름 사용자 지정 등의 작업을 자동으로 추가하는 로직 제공
 qt_add_executable(${PROJECT_NAME}
-    main.cpp
+    main.cpp define.h
 )
 
 # resources.qrc 경로는 graphics 하위에 있음
