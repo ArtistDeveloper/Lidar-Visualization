@@ -167,54 +167,9 @@ void PointCloudViewer::keyPressEvent(QKeyEvent *e)
     QOpenGLWidget::keyPressEvent(e);
 }
 
-// void PointCloudViewer::paintGL()
-// {
-//     updateGridIfNeeded();
-
-//     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-//     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-//     program_->bind();
-
-//     // MVP 행렬 계산 및 전송
-//     QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
-//     program_->setUniformValue("u_mvp", mvp);
-
-//     glBindVertexArray(vao_);
-//     glDrawArrays(GL_POINTS, 0, pointCloud_.size());
-//     glBindVertexArray(0);
-
-//     program_->release();
-
-//     /* --- Grid --- */
-//     if (drawGrid_)
-//     {
-//         gridProgram_->bind();
-//         QMatrix4x4 mvp = projMatrix_ * camera_->getViewMatrix();
-//         gridProgram_->setUniformValue("u_mvp", mvp);
-//         glBindVertexArray(gridVao_);
-//         glDrawArrays(GL_LINES, 0, gridVertexCount_);
-//         glBindVertexArray(0);
-//         gridProgram_->release();
-//     }
-//     {
-//         // OpenGL ↔ QPainter 혼용 시 깊이 테스트는 끄는 편이 안전
-//         glDisable(GL_DEPTH_TEST);
-
-//         QPainter painter(this);
-//         painter.setRenderHint(QPainter::TextAntialiasing, true);
-//         painter.setPen(Qt::white); // 필요하면 색상 조절
-//         drawAxisLabels(painter, mvp, width(), height());
-//         painter.end();
-
-//         glEnable(GL_DEPTH_TEST);
-//     }
-// }
-
 void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &src)
 {
     makeCurrent();
-    constexpr float KITTI_SENSOR_HEIGHT = 1.73f;
 
     pointCloud_.resize(src.size());
     std::transform(src.begin(), src.end(), pointCloud_.begin(),
@@ -222,7 +177,7 @@ void PointCloudViewer::setPointCloudData(const std::vector<PointXYZI> &src)
                    {
                        return PointXYZI{
                            p.x,
-                           p.z + KITTI_SENSOR_HEIGHT,
+                           p.z,
                            -p.y,
                            p.intensity};
                    });

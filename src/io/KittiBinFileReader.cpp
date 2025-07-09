@@ -16,6 +16,7 @@ std::vector<PointXYZI> KittiBinFileReader::loadKittiBinFile(const std::string &f
     PointXYZI point;
     while (file.read(reinterpret_cast<char *>(&point), sizeof(PointXYZI)))
     {
+        point.z = point.z + KITTI_SENSOR_HEIGHT;
         points.push_back(point);
     }
 
