@@ -17,6 +17,13 @@ Player와 Widget 간의 양방향 이벤트를 중재하는 허브용도로 사�
 #include "LoadFolderController.h"
 #include "PointCloudRepository.h"
 
+#ifndef MAX_GRID_SIZE
+#define MAX_GRID_SIZE 500
+#endif
+
+extern void buildGridForFrame(const std::vector<PointXYZI> &pts);  // main.cpp 내부 함수
+extern std::vector<int> gridIndices[MAX_GRID_SIZE][MAX_GRID_SIZE]; // 전역 인덱스
+
 PlaybackMediator::PlaybackMediator(MenuButton *openBtn,
                                    PointCloudPlayerWidget *controls,
                                    PointCloudViewer *viewer,
@@ -76,9 +83,50 @@ void PlaybackMediator::onSliderMoved(int i)
 
 /* ---------- Player 알림 → UI ---------- */
 
+// void PlaybackMediator::onFrameChanged(const std::vector<PointXYZI> &pts)
+// {
+//     viewer_->setPointCloudData(pts);
+// }
+
+// NOTE: Checkboard Test Rendering
 void PlaybackMediator::onFrameChanged(const std::vector<PointXYZI> &pts)
 {
-    viewer_->setPointCloudData(pts);
+    buildGridForFrame(pts);
+
+    static std::vector<PointXYZI> aggregate;
+    aggregate.clear();
+    aggregate.reserve(pts.size()); // 전체 크기만큼 미리 예약
+
+    const int block = 4; // ← 블록 크기 조절용 상수
+
+    for (int gx = 0; gx < MAX_GRID_SIZE; ++gx)
+        for (int gy = 0; gy < MAX_GRID_SIZE; ++gy)
+        {
+            bool red = (((gx / block) + (gy / block)) & 1);
+
+            const auto &ids = gridIndices[gx][gy];
+            for (int id : ids)
+            {
+                PointXYZI p = pts[id];
+                p.intensity = red ? 1.0f : 0.0f; // flag
+                aggregate.push_back(p);
+            }
+        }
+
+    // for (int gx = 0; gx < MAX_GRID_SIZE; ++gx)
+    //     for (int gy = 0; gy < MAX_GRID_SIZE; ++gy)
+    //     {
+    //         bool red = ((gx + gy) & 1); // true → 빨강
+    //         const auto &ids = gridIndices[gx][gy];
+    //         for (int id : ids)
+    //         {
+    //             PointXYZI p = pts[id]; // 원본 복사
+    //             p.intensity = red ? 1.0f : 0.0f; // 플래그만 덮어씀
+    //             aggregate.push_back(p);
+    //         }
+    //     }
+
+    viewer_->setPointCloudData(aggregate);
 }
 
 void PlaybackMediator::onFrameIndexChanged(int idx)

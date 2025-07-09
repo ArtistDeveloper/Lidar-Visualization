@@ -17,6 +17,7 @@ class PointCloudViewer : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Co
 public:
     PointCloudViewer(QWidget *parent = nullptr);
     ~PointCloudViewer();
+    void setDrawColor(const QVector3D& c) { drawColor_ = c; }
 
 public slots:
     void setPointCloudData(const std::vector<PointXYZI> &points);
@@ -40,6 +41,7 @@ private:
     GLuint vbo_ = 0;
     QMatrix4x4 projMatrix_;
     QPoint lastMousePos_;
+    QVector3D drawColor_{1.f, 1.f, 1.f};
 
     std::vector<PointXYZI> pointCloud_;
     std::unique_ptr<OrbitCamera> camera_;

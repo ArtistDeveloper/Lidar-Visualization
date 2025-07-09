@@ -7,27 +7,21 @@ typedef struct CELL_INFO
 {
    float fMinZ_GND;
    float fMaxZ_GND;
-   float fX_sum;
-   float fY_sum;
-   float R_numer;
-   float R_denom_fX;
-   float R_denom_fY;
-   float CorrCoef;
    float fX;
    float fY;
    int iCellStatusFlag;
    int NumOfPnt_CELL;
-
+   // NOTE: 1. 내 생각에는 여기에 POINT INFO 배열이 있어야 할 것 같은데, 아닌가?
 } CELL_INFO_t;
 
 
 typedef struct POINT_INFO
 {
+   // NOTE: 아니면, 해당 POINT에 해당하는 GridCell의 정보를 대입하는 방법도 있겠지.
    float fX_m;
    float fY_m;
    float fZ_m;
    float fIntensity;
-   float fRho_m;
    float fTheta_deg;
    int iLayer;
    int iCloseFlag;
@@ -36,12 +30,14 @@ typedef struct POINT_INFO
 } POINT_INFO_t;
 
 
+// 여기서 POINT_INFO를 저장해놓네. 해당 Point를 기반으로 렌더링 하나봄
+// 근데, 이것을 사용하는 코드는 확인할 수 없는데, 아마 해당 정보까지 합쳐서 렌더링 위치를 결정하나봄
 typedef struct tLIDAR_POINT
 {
    int iInitFlag;
    int iNumOfPnt;
    int iAzimuth;
-   POINT_INFO_t astPntInfo[MAX_NUM_POINT];
+   POINT_INFO_t astPntInfo[MAX_NUM_POINT]; 
 } LIDAR_POINT_t;
 
 
@@ -71,7 +67,7 @@ typedef struct EACH_CONVEX_t
    float afY[MAX_NUM_POINT_PER_OBJECT]; // convex_hull_coord_fY[point마다 ID]
    double minfZ;
    double maxfZ;
-   double fX1; // 빢쓰 X, Y좌표
+   double fX1; // 박스 X, Y좌표
    double fX2;
    double fX3;
    double fX4;
@@ -91,7 +87,7 @@ typedef struct SEGMENT_t
    int iNumOfSeg; // object 갯수
    EACH_SEGMENT astEachSeg[MAX_NUM_OBJECT_CLUSTERING];
    EACH_CONVEX astEachConvex[MAX_NUM_OBJECT_CLUSTERING];
-   double fX1; // 빢쓰 X, Y좌표
+   double fX1; // 박스 x, y 좌표
    double fX2;
    double fX3;
    double fX4;
