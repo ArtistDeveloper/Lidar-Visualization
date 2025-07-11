@@ -11,13 +11,11 @@ typedef struct CELL_INFO
    float fY;
    int iCellStatusFlag;
    int NumOfPnt_CELL;
-   // NOTE: 1. 내 생각에는 여기에 POINT INFO 배열이 있어야 할 것 같은데, 아닌가?
 } CELL_INFO_t;
 
 
 typedef struct POINT_INFO
 {
-   // NOTE: 아니면, 해당 POINT에 해당하는 GridCell의 정보를 대입하는 방법도 있겠지.
    float fX_m;
    float fY_m;
    float fZ_m;

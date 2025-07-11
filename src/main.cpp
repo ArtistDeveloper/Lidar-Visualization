@@ -19,17 +19,17 @@ void buildGridForFrame(const std::vector<PointXYZI>& pts)
 {
     const int GRID_HALF = MAX_GRID_SIZE / 2;
 
-    /* 0) 초기화: 메타데이터 & 인덱스 리스트 모두 비움 */
+    // 초기화: 메타데이터 & 인덱스 리스트 모두 비움
     for (int gx = 0; gx < MAX_GRID_SIZE; ++gx)
         for (int gy = 0; gy < MAX_GRID_SIZE; ++gy) {
             grid[gx][gy] = {};              // 모든 필드 0 / nullptr
             gridIndices[gx][gy].clear();
         }
 
-    /* 1) 포인트 루프 → 셀 매핑 */
+    // 포인트 루프 → 셀 매핑
     for (std::size_t i = 0; i < pts.size(); ++i)
     {
-        const auto& p = pts[i];             // p.x , p.y 는 KITTI 평면 좌표
+        const auto& p = pts[i]; // p.x , p.y 는 KITTI 평면 좌표
         int gx = static_cast<int>(std::floor(p.x / CELL_SIZE)) + GRID_HALF;
         int gy = static_cast<int>(std::floor(p.y / CELL_SIZE)) + GRID_HALF;
         if (gx < 0 || gx >= MAX_GRID_SIZE ||
@@ -49,7 +49,6 @@ void buildGridForFrame(const std::vector<PointXYZI>& pts)
         gridIndices[gx][gy].push_back(static_cast<int>(i)); // 인덱스 저장
     }
 }
-
 
 
 int main(int argc, char *argv[])
