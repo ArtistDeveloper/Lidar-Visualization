@@ -325,7 +325,7 @@ void PointCloudViewer::buildGrid(float step)
     if (!gridProgram_)
         gridProgram_ = ShaderProgram::create(":/shader/grid.vs", ":/shader/grid.fs");
 
-    constexpr float EXTENT = 75.f; // -750 m ~ +75 m
+    constexpr float EXTENT = 100.f; // -100m ~ +100m
     std::vector<float> v;
     const int lines = static_cast<int>((EXTENT * 2) / step) + 1;
     v.reserve(lines * 4 * 3);
@@ -396,7 +396,7 @@ void PointCloudViewer::drawAxisLabels(QPainter &p,
 
     const float step = currentGridStep_;
     const int digits = (step < 1.f) ? 1 : 0;
-    constexpr float EXTENT = 75.f; // buildGrid와 동일
+    constexpr float EXTENT = 100.f; // buildGrid와 동일
 
     // X축 위 라벨
     for (float x = -EXTENT; x <= EXTENT + 0.001f; x += step)
