@@ -27,7 +27,7 @@ void buildGridForFrame(const std::vector<PointXYZI> &pts)
             gridIndices[gx][gy].clear();
         }
 
-    // 포인트 루프 → 셀 매핑
+    // 셀 매핑
     for (unsigned int i = 0; i < pts.size(); ++i)
     {
         const auto &p = pts[i]; // p.x , p.y 는 KITTI 평면 좌표
@@ -41,10 +41,14 @@ void buildGridForFrame(const std::vector<PointXYZI> &pts)
 
         CELL_INFO &c = grid[gx][gy];
 
+        // 첫 방문 셀: 초기화
         if (c.NumOfPnt_CELL == 0)
-        {   // 첫 방문 셀: 초기화
+        {   
             c.fMinZ_GND = c.fMaxZ_GND = p.z;
-            c.fX = (gx - GRID_HALF + 0.5f) * CELL_SIZE; // 셀 중심 좌표
+            // 그리드 중심을 (0,0)으로 평행이동 후
+            // 배열 인덱스 - 실 번호에 대한 실제 위치 + 셀 폭의 절반 * CELL_SIZE
+            // 먼저 0.5를 더하고 CELL_SIZE로 스케일링 해도 셀 중앙 이동과 같음
+            c.fX = (gx - GRID_HALF + 0.5f) * CELL_SIZE;
             c.fY = (gy - GRID_HALF + 0.5f) * CELL_SIZE;
         }
         else
@@ -53,7 +57,7 @@ void buildGridForFrame(const std::vector<PointXYZI> &pts)
             c.fMaxZ_GND = std::max(c.fMaxZ_GND, p.z);
         }
         ++c.NumOfPnt_CELL;
-        gridIndices[gx][gy].push_back(static_cast<int>(i)); // 인덱스 저장
+        gridIndices[gx][gy].push_back(static_cast<int>(i)); // 현재 포인트가 pts벡터에서 몇 번째 인지 저장
     }
 }
 
