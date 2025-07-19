@@ -108,3 +108,31 @@ typedef struct tGL_3F
    float fY;
    float fZ;
 } GL_3F_t;
+
+
+struct PWParams {
+    bool enable_RNR  = false;   // POC: 일단 false
+    bool enable_RVPF = true;
+    bool enable_TGR  = true;
+
+    int  num_iter    = 3;
+    int  num_lpr     = 20;
+    int  num_min_pts = 10;
+
+    float sensor_height = 1.73f;
+
+    float th_seeds      = 0.125f;
+    float th_seeds_v    = 0.25f;
+    float th_dist       = 0.125f;
+    float th_dist_v     = 0.10f;
+
+    float uprightness_thr = 0.707f;   // cos(45°)=0.707
+    int   num_rings_of_interest = 4;  // near 구간 개수
+
+    // ring 별 adaptive threshold
+    float elevation_thr[4] = {0,0,0,0};
+    float flatness_thr[4]  = {0,0,0,0};
+
+    // 통계 저장 한도
+    int max_store = 1000;
+};
