@@ -23,6 +23,9 @@ target_sources(${PROJECT_NAME} PRIVATE ${app_resources})
 
 
 target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+        Eigen3::Eigen
+
     PRIVATE
         ui
         core

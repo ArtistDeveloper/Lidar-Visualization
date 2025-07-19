@@ -3,6 +3,8 @@
 #include <QSurfaceFormat>
 #include <vector>
 #include <cmath>
+#include <Eigen/Dense>
+#include <iostream>
 
 #include "PointTypes.h"
 #include "MainWindow.h"
