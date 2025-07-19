@@ -28,8 +28,6 @@ typedef struct POINT_INFO
 } POINT_INFO_t;
 
 
-// 여기서 POINT_INFO를 저장해놓네. 해당 Point를 기반으로 렌더링 하나봄
-// 근데, 이것을 사용하는 코드는 확인할 수 없는데, 아마 해당 정보까지 합쳐서 렌더링 위치를 결정하나봄
 typedef struct tLIDAR_POINT
 {
    int iInitFlag;
