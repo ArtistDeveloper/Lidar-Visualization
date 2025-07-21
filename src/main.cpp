@@ -14,7 +14,7 @@
 #define CELL_SIZE 0.5f
 
 CELL_INFO grid[MAX_GRID_SIZE][MAX_GRID_SIZE];
-std::vector<int> gridIndices[MAX_GRID_SIZE][MAX_GRID_SIZE]; // 셀 → pts 인덱스 리스트
+std::vector<int> gridIndices[MAX_GRID_SIZE][MAX_GRID_SIZE]; // 한 프레임 내에서 각 셀에서 가지고 있는 포인트 클라우드 데이터에 대한 인덱스
 
 // === (1) 추가 설정값들 ===
 constexpr int MIN_POINTS_PER_CELL = 1;
@@ -37,49 +37,54 @@ enum : int
 static const int OFFS[8][2] = {
     {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
-// === (2) 헬퍼: 인덱스 경계 검사 ===
 inline bool inBounds(int gx, int gy)
 {
     return (gx >= 0 && gx < MAX_GRID_SIZE && gy >= 0 && gy < MAX_GRID_SIZE);
 }
 
-// --- 추가: 퍼센타일 기반 robust min 구하는 함수 (segmentGroundCells 위나 아래 임의 위치) ---
-float computeRobustGlobalMinZ(float percentile = 0.05f)
+// 가장 낮은 z대신 하위 p-백분위수를 global baseline으로 사용
+// 이거 대신 RNR을 사용해도 robust해질 수 있지 않을까?
+float computeRobustGlobalMinZ(float percentile = 0.05f, int depth = 0)
 {
     std::vector<float> mins;
-    mins.reserve(10000); // 대략 여유
+    mins.reserve(10000);
+
+    // 모든 그리드 셀에서 가장 낮은 z값을 탐색
     for (int gx = 0; gx < MAX_GRID_SIZE; ++gx)
+    {
         for (int gy = 0; gy < MAX_GRID_SIZE; ++gy)
         {
             const CELL_INFO &c = grid[gx][gy];
             if (c.NumOfPnt_CELL > 0)
                 mins.push_back(c.fMinZ_GND);
         }
+    }
+
+    // 결과가 없다면, float의 MAX값 return
     if (mins.empty())
         return std::numeric_limits<float>::infinity();
 
-    // 퍼센타일 인덱스
+    // 해당 백분위에 해당하는 값 ㅂ선택
     size_t k = static_cast<size_t>(std::clamp(percentile, 0.0f, 1.0f) * (mins.size() - 1));
     std::nth_element(mins.begin(), mins.begin() + k, mins.end());
     float val = mins[k];
 
-    // (선택적) 너무 말도 안 되게 낮으면 (예: -8m 이하) 2배 높은 퍼센타일로 재시도
-    if (val < -8.0f && percentile < 0.15f)
+    // 추정된 globalMinZ가 -8 아래이며 percentile이 0.15이면 값 재추출 시도
+    if (val < -8.0f && percentile < 0.15f && depth < 3)
     {
-        // 10% 재시도
-        return computeRobustGlobalMinZ(0.10f);
+        float repeatedP = std::min(percentile * 2.0f, 1.0f);
+        return computeRobustGlobalMinZ(repeatedP, depth + 1);
     }
     return val;
 }
 
-// === (3) Ground 확장 함수 ===
 void segmentGroundCells()
 {
     float globalMinZ = computeRobustGlobalMinZ(0.05f);
     if (!std::isfinite(globalMinZ))
         return;
 
-    // 2) Seed 선택
+    // Seed (Ground가 될 유력한 셀) 선택
     std::vector<std::pair<int, int>> seedCells;
     seedCells.reserve(1024);
 
@@ -87,6 +92,7 @@ void segmentGroundCells()
              << " seeds=" << seedCells.size();
 
     for (int gx = 0; gx < MAX_GRID_SIZE; ++gx)
+    {
         for (int gy = 0; gy < MAX_GRID_SIZE; ++gy)
         {
             CELL_INFO &c = grid[gx][gy];
@@ -109,8 +115,9 @@ void segmentGroundCells()
             c.iCellStatusFlag = CELL_GROUND;
             seedCells.emplace_back(gx, gy);
         }
+    }
 
-    // 3) BFS 확장
+    // BFS 확장
     std::queue<std::pair<int, int>> q;
     for (auto &p : seedCells)
         q.push(p);
@@ -152,6 +159,7 @@ void segmentGroundCells()
 
     // 4) 잔여 셀 분류
     for (int gx = 0; gx < MAX_GRID_SIZE; ++gx)
+    {
         for (int gy = 0; gy < MAX_GRID_SIZE; ++gy)
         {
             CELL_INFO &c = grid[gx][gy];
@@ -173,6 +181,7 @@ void segmentGroundCells()
                 c.iCellStatusFlag = CELL_OBJECT;
             }
         }
+    }
 
 #define DEBUG_SEG
 #ifdef DEBUG_SEG
@@ -200,7 +209,7 @@ void buildGridForFrame(const std::vector<PointXYZI> &pts)
 {
     const int GRID_HALF = MAX_GRID_SIZE / 2;
 
-    // 초기화
+    // 매 프레임마다 데이터 초기화
     for (int gx = 0; gx < MAX_GRID_SIZE; ++gx)
         for (int gy = 0; gy < MAX_GRID_SIZE; ++gy)
         {
@@ -208,9 +217,10 @@ void buildGridForFrame(const std::vector<PointXYZI> &pts)
             gridIndices[gx][gy].clear();
         }
 
-    // 1-pass: 셀 통계
+    // 포인트 클라우드 데이터를 각 셀에 매핑
     for (unsigned int i = 0; i < pts.size(); ++i)
     {
+        // Bird-view 시점으로 그리드 배열에 접근할 인덱스 gx, gy 추출
         const auto &p = pts[i];
         int gx = static_cast<int>(std::floor(p.x / CELL_SIZE)) + GRID_HALF;
         int gy = static_cast<int>(std::floor(p.y / CELL_SIZE)) + GRID_HALF;
@@ -219,9 +229,13 @@ void buildGridForFrame(const std::vector<PointXYZI> &pts)
 
         CELL_INFO &c = grid[gx][gy];
 
+        // 첫 방문 셀 초기화
         if (c.NumOfPnt_CELL == 0)
         {
             c.fMinZ_GND = c.fMaxZ_GND = p.z;
+            // 인덱스를 데카르트 좌표계로 이동 후
+            // 배열 인덱스 - 실제 번호에 대한 실제 위치 + 셀 폭의 절반 * CELL_SIZE
+            // 먼저 0.5을 더하고 CELL_SIZE로 스케일링 해도 셀 중앙 이동과 같음
             c.fX = (gx - GRID_HALF + 0.5f) * CELL_SIZE;
             c.fY = (gy - GRID_HALF + 0.5f) * CELL_SIZE;
             c.iCellStatusFlag = CELL_UNKNOWN;
