@@ -19,7 +19,7 @@ std::vector<int> gridIndices[MAX_GRID_SIZE][MAX_GRID_SIZE]; // 한 프레임 내
 // Ground segmentation을 위한 rule-based 임계값
 constexpr int MIN_POINTS_PER_CELL = 1;
 constexpr float CELL_VAR_THRESH = 0.30f;      // seed 선정 용
-constexpr float CELL_VAR_GROWTH = 0.25f;      // 확장 시 허용
+constexpr float CELL_VAR_GROWTH = 0.40f;      // 확장 시 허용
 constexpr float NEIGHBOR_MINZ_DIFF = 0.25f;   // 인접 ground 연속성 허용 높이차
 constexpr float SEED_ABS_THRESH = 0.80f;      // globalMinZ 로부터 seed 허용 높이
 constexpr float SEED_RADIUS = 6.0f;           // (m) 초기 seed 반경
@@ -42,6 +42,17 @@ struct SeedRejectStats
     int rejectedRadius = 0;
 };
 SeedRejectStats stats;
+
+struct BFSRejectStats
+{
+    int checked = 0;
+    int empty = 0;
+    int visited = 0;
+    int span = 0;
+    int dz = 0;
+    int zgap = 0; // (ncell.minZ - globalMinZ) > 2.0
+};
+BFSRejectStats bfsStats;
 
 // 8방향 이동
 static const int OFFS[8][2] = {
@@ -164,28 +175,44 @@ void segmentGroundCells()
                 continue;
 
             CELL_INFO &ncell = grid[nx][ny];
-            
+            ++bfsStats.checked;
+
             // 빈 셀 / 희소한 셀 배제 (seed에서도 걸러놓았긴 했음)
             if (ncell.NumOfPnt_CELL < MIN_POINTS_PER_CELL)
+            {
+                ++bfsStats.empty;
                 continue;
+            }
 
             // 이미 방문한 곳 중복 처리 방지
             if (ncell.iCellStatusFlag == CELL_GROUND)
+            {
+                ++bfsStats.visited;
                 continue;
+            }
 
             // 셀 내부가 울퉁불퉁한 범위가 크면 지면으로 보기 어려움
             float span = ncell.fMaxZ_GND - ncell.fMinZ_GND;
             if (span > CELL_VAR_GROWTH)
+            {
+                ++bfsStats.span;
                 continue;
+            }
 
             // 현재 확장중인 Ground 셀과 높이 차이가 급격하면 제외
             float dz = std::fabs(ncell.fMinZ_GND - curr.fMinZ_GND);
             if (dz > NEIGHBOR_MINZ_DIFF)
+            {
+                ++bfsStats.dz;
                 continue;
+            }
 
             // 전역 바닥보다 너무 높이 띄어 있으면 제외 (과도한 계단/차량)
             if ((ncell.fMinZ_GND - globalMinZ) > 2.0f)
+            {
+                ++bfsStats.zgap;
                 continue;
+            }
 
             ncell.iCellStatusFlag = CELL_GROUND;
             q.emplace(nx, ny);
@@ -247,10 +274,18 @@ void segmentGroundCells()
              << "rejected empty=" << stats.rejectedEmpty
              << "rejected span=" << stats.rejectedSpan
              << "rejected dz=" << stats.rejectedDz
-             << "rejected radius=" << stats.rejectedRadius
+             << "rejected radius=" << stats.rejectedRadius;
+
+    qDebug() << "[BFS] checked=" << bfsStats.checked
+             << "empty=" << bfsStats.empty
+             << "visited=" << bfsStats.visited
+             << "span=" << bfsStats.span
+             << "dz=" << bfsStats.dz
+             << "zgap=" << bfsStats.zgap
              << "\n";
 #endif
     stats = {};
+    bfsStats = {};
 }
 
 void buildGridForFrame(const std::vector<PointXYZI> &pts)
