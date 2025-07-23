@@ -7,8 +7,8 @@ typedef struct CELL_INFO
 {
    float fMinZ_GND;
    float fMaxZ_GND;
-   float fX;
-   float fY;
+   float centerX;
+   float centerY;
    int iCellStatusFlag;
    int NumOfPnt_CELL;
 } CELL_INFO_t;

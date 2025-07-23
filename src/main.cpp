@@ -16,14 +16,14 @@
 CELL_INFO grid[MAX_GRID_SIZE][MAX_GRID_SIZE];
 std::vector<int> gridIndices[MAX_GRID_SIZE][MAX_GRID_SIZE]; // 한 프레임 내에서 각 셀에서 가지고 있는 포인트 클라우드 데이터에 대한 인덱스
 
-// === (1) 추가 설정값들 ===
+// Ground segmentation을 위한 rule-based 임계값
 constexpr int MIN_POINTS_PER_CELL = 1;
 constexpr float CELL_VAR_THRESH = 0.15f;      // seed 선정 용
 constexpr float CELL_VAR_GROWTH = 0.25f;      // 확장 시 허용
 constexpr float NEIGHBOR_MINZ_DIFF = 0.25f;   // 인접 ground 연속성 허용 높이차
-constexpr float SEED_ABS_THRESH = 0.30f;      // globalMinZ 로부터 seed 허용 높이
+constexpr float SEED_ABS_THRESH = 0.80f;      // globalMinZ 로부터 seed 허용 높이
 constexpr float SEED_RADIUS = 6.0f;           // (m) 초기 seed 반경
-constexpr float LOW_OBJECT_MAX_DELTA = 0.12f; // 후처리 (선택적 ground 승격)
+constexpr float LOW_OBJECT_MAX_DELTA = 0.12f; // 지면이라고 봐 줄 수 있는 최대 허용 높이 차. 0.12m => 12cm까지는 거의 지면으로 인정
 
 // iCellStatusFlag 값 정의 (POC)
 enum : int
@@ -32,6 +32,16 @@ enum : int
     CELL_GROUND = 1,
     CELL_OBJECT = 2
 };
+
+struct SeedRejectStats
+{
+    int totalCandidates = 0;
+    int rejectedEmpty = 0;
+    int rejectedSpan = 0;
+    int rejectedDz = 0;
+    int rejectedRadius = 0;
+};
+SeedRejectStats stats;
 
 // 8방향 이동
 static const int OFFS[8][2] = {
@@ -88,33 +98,59 @@ void segmentGroundCells()
     std::vector<std::pair<int, int>> seedCells;
     seedCells.reserve(1024);
 
-    qDebug() << "[SEG] globalMinZ=" << globalMinZ
-             << " seeds=" << seedCells.size();
-
     for (int gx = 0; gx < MAX_GRID_SIZE; ++gx)
     {
         for (int gy = 0; gy < MAX_GRID_SIZE; ++gy)
         {
             CELL_INFO &c = grid[gx][gy];
 
+            if (c.NumOfPnt_CELL == 0)
+                continue; // 완전 빈 셀은 통계 제외
+            ++stats.totalCandidates;
+
             // 셀에 있는 최소 포인트 밀도 확인
             if (c.NumOfPnt_CELL < MIN_POINTS_PER_CELL)
+            {
+                ++stats.rejectedEmpty;
                 continue;
+            }
 
-            // MaxZ - MinZ의 차이를 통한 고도값의 범위 확인 (추후 variance나 stddev를 사용해보도록 변경)
+            // 셀 내부의 MaxZ - MinZ의 차이를 통해 얼마나 평탄한지 확인 (추후 variance나 stddev를 사용해보도록 변경)
+            // minz는 지면인데, maxz는 객체이면 span이 크게나와서 객체 아래 바로 지면이 ground로 안잡힘
             float span = c.fMaxZ_GND - c.fMinZ_GND;
             if (span > CELL_VAR_THRESH)
+            {
+                ++stats.rejectedSpan;
                 continue;
+            }
 
-            // 
+            // 객체가 셀에 같이 들어오면 span이 커짐. 하지만 최저점은 여전히 지면일 수 있음 
+            // cell 의 minz가 globalMinZ와 거의 같다면 해당 셀 안에는 지면이 포함되있을 것
+            // float span = c.fMaxZ_GND - c.fMinZ_GND;
+            // float dzGlobal = c.fMaxZ_GND - globalMinZ;
+            // bool flatEnough = (span <= CELL_VAR_THRESH) || (dzGlobal < LOW_OBJECT_MAX_DELTA);
+            // if (!flatEnough)
+            // {
+            //     ++stats.rejectedSpan;
+            //     continue;
+            // }
+
+            // 셀의 최소 z값 - 프레임 전체에서 하위 p 백분위수로 잡은 지면 기준 높이
+            // 허용되는 최대 높이 차를 통한 조건
             float dzGlobal = c.fMinZ_GND - globalMinZ;
             if (dzGlobal > SEED_ABS_THRESH)
+            {
+                ++stats.rejectedDz;
                 continue;
+            }
 
-            // 중심에서의 반경
-            float r = std::sqrt(c.fX * c.fX + c.fY * c.fY);
+            // 센서 원점으로 부터 너무 먼 셀은 seed에서 제외
+            float r = std::sqrt(c.centerX * c.centerX + c.centerY * c.centerY);
             if (r > SEED_RADIUS)
+            {
+                ++stats.rejectedRadius;
                 continue;
+            }
 
             c.iCellStatusFlag = CELL_GROUND;
             seedCells.emplace_back(gx, gy);
@@ -173,7 +209,7 @@ void segmentGroundCells()
             if (c.iCellStatusFlag == CELL_GROUND)
                 continue;
 
-            // 선택적 승격(매우 낮고 편평)
+            // 선택적 승격(매우 낮고 평평)
             float span = c.fMaxZ_GND - c.fMinZ_GND;
             if (span < CELL_VAR_THRESH &&
                 (c.fMinZ_GND - globalMinZ) < LOW_OBJECT_MAX_DELTA)
@@ -191,6 +227,7 @@ void segmentGroundCells()
 #ifdef DEBUG_SEG
     int cntCells = 0, cntGround = 0, cntObject = 0, cntSeed = 0;
     for (int gx = 0; gx < MAX_GRID_SIZE; ++gx)
+    {
         for (int gy = 0; gy < MAX_GRID_SIZE; ++gy)
         {
             auto &c = grid[gx][gy];
@@ -202,13 +239,25 @@ void segmentGroundCells()
             else if (c.iCellStatusFlag == CELL_OBJECT)
                 ++cntObject;
         }
+    }
+
+    // total segmentation result
     qDebug() << "[SEG] cellsWithPoints=" << cntCells
              << " ground=" << cntGround
              << " object=" << cntObject;
+
+    // seed segmentation debug
+    qDebug() << "[SEED] totalCand=" << stats.totalCandidates
+             << "seed count=" << seedCells.size()
+             << "rejected empty=" << stats.rejectedEmpty
+             << "rejected span=" << stats.rejectedSpan
+             << "rejected dz=" << stats.rejectedDz
+             << "rejected radius=" << stats.rejectedRadius
+             << "\n";
 #endif
+    stats = {};
 }
 
-// === (4) buildGridForFrame 수정: 마지막에 segmentGroundCells 호출 ===
 void buildGridForFrame(const std::vector<PointXYZI> &pts)
 {
     const int GRID_HALF = MAX_GRID_SIZE / 2;
@@ -240,8 +289,8 @@ void buildGridForFrame(const std::vector<PointXYZI> &pts)
             // 인덱스를 데카르트 좌표계로 이동 후
             // 배열 인덱스 - 실제 번호에 대한 실제 위치 + 셀 폭의 절반 * CELL_SIZE
             // 먼저 0.5을 더하고 CELL_SIZE로 스케일링 해도 셀 중앙 이동과 같음
-            c.fX = (gx - GRID_HALF + 0.5f) * CELL_SIZE;
-            c.fY = (gy - GRID_HALF + 0.5f) * CELL_SIZE;
+            c.centerX = (gx - GRID_HALF + 0.5f) * CELL_SIZE;
+            c.centerY = (gy - GRID_HALF + 0.5f) * CELL_SIZE;
             c.iCellStatusFlag = CELL_UNKNOWN;
         }
         else
@@ -253,7 +302,6 @@ void buildGridForFrame(const std::vector<PointXYZI> &pts)
         gridIndices[gx][gy].push_back(static_cast<int>(i));
     }
 
-    // 2) Ground Segmentation
     segmentGroundCells();
 }
 
