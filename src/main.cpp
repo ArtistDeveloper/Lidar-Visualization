@@ -18,7 +18,7 @@ std::vector<int> gridIndices[MAX_GRID_SIZE][MAX_GRID_SIZE]; // 한 프레임 내
 
 // Ground segmentation을 위한 rule-based 임계값
 constexpr int MIN_POINTS_PER_CELL = 1;
-constexpr float CELL_VAR_THRESH = 0.15f;      // seed 선정 용
+constexpr float CELL_VAR_THRESH = 0.30f;      // seed 선정 용
 constexpr float CELL_VAR_GROWTH = 0.25f;      // 확장 시 허용
 constexpr float NEIGHBOR_MINZ_DIFF = 0.25f;   // 인접 ground 연속성 허용 높이차
 constexpr float SEED_ABS_THRESH = 0.80f;      // globalMinZ 로부터 seed 허용 높이
@@ -124,17 +124,6 @@ void segmentGroundCells()
                 continue;
             }
 
-            // 객체가 셀에 같이 들어오면 span이 커짐. 하지만 최저점은 여전히 지면일 수 있음 
-            // cell 의 minz가 globalMinZ와 거의 같다면 해당 셀 안에는 지면이 포함되있을 것
-            // float span = c.fMaxZ_GND - c.fMinZ_GND;
-            // float dzGlobal = c.fMaxZ_GND - globalMinZ;
-            // bool flatEnough = (span <= CELL_VAR_THRESH) || (dzGlobal < LOW_OBJECT_MAX_DELTA);
-            // if (!flatEnough)
-            // {
-            //     ++stats.rejectedSpan;
-            //     continue;
-            // }
-
             // 셀의 최소 z값 - 프레임 전체에서 하위 p 백분위수로 잡은 지면 기준 높이
             // 허용되는 최대 높이 차를 통한 조건
             float dzGlobal = c.fMinZ_GND - globalMinZ;
@@ -145,12 +134,12 @@ void segmentGroundCells()
             }
 
             // 센서 원점으로 부터 너무 먼 셀은 seed에서 제외
-            float r = std::sqrt(c.centerX * c.centerX + c.centerY * c.centerY);
-            if (r > SEED_RADIUS)
-            {
-                ++stats.rejectedRadius;
-                continue;
-            }
+            // float r = std::sqrt(c.centerX * c.centerX + c.centerY * c.centerY);
+            // if (r > SEED_RADIUS)
+            // {
+            //     ++stats.rejectedRadius;
+            //     continue;
+            // }
 
             c.iCellStatusFlag = CELL_GROUND;
             seedCells.emplace_back(gx, gy);
@@ -175,15 +164,21 @@ void segmentGroundCells()
                 continue;
 
             CELL_INFO &ncell = grid[nx][ny];
+            
+            // 빈 셀 / 희소한 셀 배제 (seed에서도 걸러놓았긴 했음)
             if (ncell.NumOfPnt_CELL < MIN_POINTS_PER_CELL)
                 continue;
-            if (ncell.iCellStatusFlag == CELL_GROUND)
-                continue; // 이미 ground
 
+            // 이미 방문한 곳 중복 처리 방지
+            if (ncell.iCellStatusFlag == CELL_GROUND)
+                continue;
+
+            // 셀 내부가 울퉁불퉁한 범위가 크면 지면으로 보기 어려움
             float span = ncell.fMaxZ_GND - ncell.fMinZ_GND;
             if (span > CELL_VAR_GROWTH)
                 continue;
 
+            // 현재 확장중인 Ground 셀과 높이 차이가 급격하면 제외
             float dz = std::fabs(ncell.fMinZ_GND - curr.fMinZ_GND);
             if (dz > NEIGHBOR_MINZ_DIFF)
                 continue;
